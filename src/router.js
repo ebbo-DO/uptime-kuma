@@ -20,6 +20,7 @@ import MaintenanceDetails from "./pages/MaintenanceDetails.vue";
 import ManageMaintenance from "./pages/ManageMaintenance.vue";
 import APIKeys from "./components/settings/APIKeys.vue";
 import SetupDatabase from "./pages/SetupDatabase.vue";
+import Reports from "./pages/Reports.vue";
 
 // Settings - Sub Pages
 import Appearance from "./components/settings/Appearance.vue";
@@ -75,6 +76,10 @@ const routes = [
                                 path: "/add",
                                 component: EditMonitor,
                             },
+                            {
+                                path: "/reports/:id",
+                                component: Reports,
+                            },
                         ],
                     },
                     {
@@ -129,7 +134,7 @@ const routes = [
                                 path: "about",
                                 component: About,
                             },
-                        ]
+                        ],
                     },
                     {
                         path: "/manage-status-page",

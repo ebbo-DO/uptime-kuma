@@ -295,6 +295,13 @@ class RealBrowserKeywordMonitorType extends MonitorType {
             timeout: monitor.interval * 1000 * 0.8,
         });
 
+        //TODO - Make screenshot an option.
+        let filename = jwt.sign(monitor.id, server.jwtSecret) + ".png";
+
+        await page.screenshot({
+            path: path.join(Database.screenshotDir, filename),
+        });
+
         let content = await page.content();
 
         //Add iFrame Support
@@ -318,12 +325,7 @@ class RealBrowserKeywordMonitorType extends MonitorType {
         // }
         // console.log("END iFrame");
 
-        //TODO - Make screenshot an option.
-        let filename = jwt.sign(monitor.id, server.jwtSecret) + ".png";
-
-        await page.screenshot({
-            path: path.join(Database.screenshotDir, filename),
-        });
+        
 
         // console.log(monitor.keyword);
         // console.log(content);
