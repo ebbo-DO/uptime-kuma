@@ -1,8 +1,7 @@
 <template>
     <transition name="slide-fade" appear>
         <div v-if="monitor">
-            <!-- TODO - Translation -->
-            <h1 class="text-center">{{ monitor.name }} Report</h1>
+            <h1 class="text-center">{{ monitor.name }} {{ $t("Report") }}</h1>
             <div class="container">
                 <div class="row">
                     <div class="col text-start">
@@ -34,15 +33,14 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="col-6 text-start" v-if="chartPeriodHrs === 'c'">
+                    <div v-if="chartPeriodHrs === 'c'" class="col-6 text-start">
                         <div class="col-auto">
                             <label class="form-label">
-                                <!-- TODO - Translate -->
                                 {{ $t("Custom Dates") }}: &nbsp;
                             </label>
                         </div>
                         <Datepicker
-                            v-model="this.customDateRange"
+                            v-model="customDateRange"
                             :dark="$root.isDark"
                             range
                             :partial-range="false"
@@ -58,7 +56,6 @@
                             {{ $t("Dashboard") }}
                         </router-link>
                         <button class="btn btn-primary" @click="printReport">
-                            <!-- TODO - Translation -->
                             <font-awesome-icon icon="print" /> {{ $t("Print") }}
                         </button>
                     </div>
@@ -67,16 +64,26 @@
             <!-- NOTE - Start Printable Area Here -->
             <div class="printMe">
                 <h1 class="text-center">Uptime Report</h1>
-                <h3 class="text-center">
-                    {{ reportTitle }}
-                </h3>
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <h3 class="text-center" v-html="reportTitle"></h3>
+                <!-- <Subreport
+                    :monitor="monitor"
+                    :chartPeriodHrs="chartPeriodHrs"
+                    :chartPeriodOptions="chartPeriodOptions"
+                /> -->
                 <Subreport
                     :monitor="monitor"
                     :chartPeriodHrs="chartPeriodHrs"
                     :chartPeriodOptions="chartPeriodOptions"
+                    :lastMonthStart="lastMonthStart"
+                    :lastMonthEnd="lastMonthEnd"
+                    :currentQuarterStart="currentQuarterStart"
+                    :currentQuarterEnd="currentQuarterEnd"
+                    :previousQuarterStart="previousQuarterStart"
+                    :previousQuarterEnd="previousQuarterEnd"
+                    :customDateRange="customDateRange"
                 />
-                <!-- TODO - Translate -->
-                <div>{{ $t("Report Generated") }}: {{ reportDate }}</div>
+                <div>{{ $t("Report Generated") }}: {{ reportDateDisplay }}</div>
             </div>
         </div>
     </transition>
@@ -94,25 +101,64 @@ export default {
     },
     data() {
         return {
-            chartPeriodHrs: "0",
+            chartPeriodHrs: 0,
             chartPeriodOptions: {
                 0: this.$t("recent"),
                 3: "3h",
                 6: "6h",
                 24: "24h",
-                168: "1w",
+                168: "7d",
                 720: "30d",
                 2160: "90d",
                 8760: "1y",
-                lm: "Last Month", //TODO - Translate
-                cq: "Current Quarter", //TODO - Translate
-                lq: "Last Quarter", //TODO - Translate
-                c: "Custom", //TODO - Translate
+                lm: this.$t("Previous Month"),
+                cq: this.$t("Current Quarter"),
+                lq: this.$t("Previous Quarter"),
+                c: this.$t("Custom"),
             },
             customDateRange: [],
+            lastMonthStart: dayjs().subtract(1, "month").startOf("month"),
+            lastMonthEnd: dayjs().subtract(1, "month").endOf("month"),
+            currentQuarterStart: dayjs().startOf("quarter"),
+            currentQuarterEnd: dayjs().endOf("quarter"),
+            previousQuarterStart: dayjs()
+                .subtract(1, "quarter")
+                .startOf("quarter"),
+            previousQuarterEnd: dayjs().subtract(1, "quarter").endOf("quarter"),
+            reportDate: dayjs().format("LLLL"),
         };
     },
     computed: {
+        reportDateDisplay() {
+            return this.reportDate;
+        },
+        lastMonthStartDisplay() {
+            return this.lastMonthStart.format("LLLL");
+        },
+        lastMonthEndDisplay() {
+            return this.lastMonthEnd.format("LLLL");
+        },
+        currentQuarterStartDisplay() {
+            return this.currentQuarterStart.format("LLLL");
+        },
+        currentQuarterEndDisplay() {
+            return this.currentQuarterEnd.format("LLLL");
+        },
+        previousQuarterStartDisplay() {
+            return this.previousQuarterStart.format("LLLL");
+        },
+        previousQuarterEndDisplay() {
+            return this.previousQuarterEnd.format("LLLL");
+        },
+        customDateDisplay() {
+            // console.log(this.customDateRange);
+            if (this.customDateRange.length > 0) {
+                return `${dayjs(this.customDateRange[0]).format(
+                    "LLLL",
+                )} - ${dayjs(this.customDateRange[1]).format("LLLL")}`;
+            }
+            return "";
+        },
         monitor() {
             let id = this.$route.params.id;
             return this.$root.monitorList[id];
@@ -121,99 +167,131 @@ export default {
             switch (this.chartPeriodHrs) {
                 case "0":
                     return this.$t("recent");
-                //     3: "3h",
-                // 6: "6h",
-                // 24: "24h",
-                // 168: "1w",
+                case "3":
+                    return `${this.$t("Last")} 3 ${this.$tc("hour", {
+                        count: 3,
+                    })}`;
+                case "6":
+                    return `${this.$t("Last")} 6 ${this.$tc("hour", {
+                        count: 6,
+                    })}`;
+                case "24":
+                    return `${this.$t("Last")} 24 ${this.$tc("hour", {
+                        count: 24,
+                    })}`;
+                case "168":
+                    return `${this.$t("Last")} 7 ${this.$tc("day", {
+                        count: 7,
+                    })}`;
                 case "720":
-                    // TODO - Translate
-                    return `Last 30 ${this.$tc("day", { count: 30 })}`;
+                    return `${this.$t("Last")} 30 ${this.$tc("day", {
+                        count: 30,
+                    })}`;
                 case "2160":
-                    // TODO
-                    return "90d";
+                    return `${this.$t("Last")} 90 ${this.$tc("day", {
+                        count: 90,
+                    })}`;
                 case "8760":
-                    // TODO
-                    return "1y";
+                    return `${this.$t("Last")} 1 ${this.$t("year")}`;
                 case "lm":
-                    // TODO
-                    return "Last Month";
+                    return `${this.$t("Previous Month")}<br/>${
+                        this.lastMonthStartDisplay
+                    } - ${this.lastMonthEndDisplay}`;
                 case "cq":
-                    // TODO
-                    return "Current Quarter";
+                    return `${this.$t("Current Quarter")}<br/>${
+                        this.currentQuarterStartDisplay
+                    } - ${this.currentQuarterEndDisplay}`;
                 case "lq":
-                    // TODO
-                    return "Last Quarter";
+                    return `${this.$t("Previous Quarter")}<br/>${
+                        this.previousQuarterStartDisplay
+                    } - ${this.previousQuarterEndDisplay}`;
                 case "c":
-                    // TODO
-                    return "Custom";
+                    return `${this.$t("Custom")}<br/>${this.customDateDisplay}`;
                 default:
                     return "";
             }
         },
-        reportDate() {
-            return dayjs().format("LLLL");
-        },
-    },
-    methods: {
-        printReport() {
-            var currTitle = document.title;
-            document.title = this.monitor.name + " Report";
-            //TODO - Add Filters to title?
-            window.print();
-            document.title = currTitle;
-        },
     },
     watch: {
-        customDateRange: function (newVal) {
-            console.log(newVal);
+        chartPeriodHrs: function (newVal) {
+            this.updateReportDate();
+            switch (newVal) {
+                case "lm":
+                    this.updateLastMonthStart();
+                    this.updateLastMonthEnd();
+                    break;
+                case "cq":
+                    this.updateCurrentQuarterStart();
+                    this.updateCurrentQuarterEnd();
+                    break;
+                case "lq":
+                    this.updatePreviousQuarterStart();
+                    this.updatePreviousQuarterEnd();
+                    break;
+                // case "c":
+                //     return `${this.$t("Custom")}`;
+                default:
+                    break;
+            }
         },
+        // customDateRange: function (newDates) {
+        //     console.log(newDates);
+        //     // if(newDates)
+        // },
     },
     created() {
-        // Setup Watcher on the root heartbeatList,
-        // And mirror latest change to this.heartbeatList
-        // this.$watch(
-        //     () => this.$root.heartbeatList[this.$route.params.id],
-        //     (heartbeatList) => {
-        //         // log.debug(
-        //         //     "ping_chart",
-        //         //     `this.chartPeriodHrs type ${typeof this
-        //         //         .chartPeriodHrs}, value: ${this.chartPeriodHrs}`
-        //         // );
-
-        //         // eslint-disable-next-line eqeqeq
-        //         if (this.chartPeriodHrs != "0") {
-        //             const newBeat = heartbeatList.at(-1);
-
-        //             if (
-        //                 newBeat &&
-        //                 dayjs.utc(newBeat.time) >
-        //                     dayjs.utc(this.heartbeatListChart?.at(-1)?.time)
-        //             ) {
-        //                 this.heartbeatListChart.push(heartbeatList.at(-1));
-        //             }
-        //         }
-        //     },
-        //     { deep: true }
-        // );
-
         // Load report period from storage if saved
         let period =
             this.$root.storage()[`report-period-${this.$route.params.id}`];
-        // console.log(period);
         if (period != null) {
             if (!isNaN(period)) {
-                this.chartPeriodHrs = Math.min(period, 6).toString();
+                this.chartPeriodHrs = Math.min(period, 6);
             } else {
                 this.chartPeriodHrs = period;
             }
         }
+    },
+    methods: {
+        updateReportDate() {
+            this.reportDate = dayjs().format("LLLL");
+        },
+        printReport() {
+            const currTitle = document.title;
+            document.title = `${
+                this.monitor.name
+            } Uptime Report ${this.reportTitle.replace("<br/>", " ")}`;
+            window.print();
+            document.title = currTitle;
+        },
+        updateLastMonthStart() {
+            this.lastMonthStart = dayjs().subtract(1, "month").startOf("month");
+        },
+        updateLastMonthEnd() {
+            this.lastMonthEnd = dayjs().subtract(1, "month").endOf("month");
+        },
+        updateCurrentQuarterStart() {
+            this.currentQuarterStart = dayjs().startOf("quarter");
+        },
+        updateCurrentQuarterEnd() {
+            this.currentQuarterEnd = dayjs().endOf("quarter");
+        },
+        updatePreviousQuarterStart() {
+            this.previousQuarterStart = dayjs()
+                .subtract(1, "quarter")
+                .startOf("quarter");
+        },
+        updatePreviousQuarterEnd() {
+            this.previousQuarterEnd = dayjs()
+                .subtract(1, "quarter")
+                .endOf("quarter");
+        },
     },
 };
 </script>
 
 <style lang="scss">
 @media print {
-    .printMe {
+    .print-me {
         background-color: white;
         position: absolute;
         top: 0;
@@ -223,17 +301,21 @@ export default {
         height: 100%;
         padding: 10px;
     }
+
     header.d-flex {
         display: none !important;
         height: 0;
     }
+
     main {
         position: relative;
         height: 0;
     }
+
     main div.shadow-box.mb-3 {
         display: none;
     }
+
     div#app {
         // display: none;
         position: relative;

@@ -50,7 +50,7 @@
     "Monitor": "Monitor | Monitors",
     "day": "day | days",
     "-day": "-day",
-    "hour": "hour",
+    "hour": "hour | hours",
     "-hour": "-hour",
     "Response": "Response",
     "Ping": "Ping",
@@ -859,5 +859,14 @@
     "successEnabled": "Enabled Successfully.",
     "tagNotFound": "Tag not found.",
     "foundChromiumVersion": "Found Chromium/Chrome. Version: {0}",
-    "GrafanaOncallUrl": "Grafana Oncall URL"
+    "GrafanaOncallUrl": "Grafana Oncall URL",
+    "No Data":"No Data",
+    "Report":"Report",
+    "Custom Dates":"Custom Dates",
+    "Print":"Print",
+    "Report Generated":"Report Generated",
+    "Previous Month":"Previous Month",
+    "Current Quarter":"Current Quarter",
+    "Previous Quarter":"Previous Quarter",
+    "Last":"Last"
 }

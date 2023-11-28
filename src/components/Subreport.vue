@@ -1,11 +1,9 @@
 <template>
     <transition name="slide-fade" appear>
-        <div v-if="monitor" style="margin-top: 10px">
+        <div v-if="monitor" style="margin-top: 10px;">
             <h2>{{ monitor.name }}</h2>
             <p v-if="monitor.description">{{ monitor.description }}</p>
-            <p v-if="group !== '' && !nested">
-                {{ group }}
-            </p>
+            <p v-if="group !== '' && !nested">{{ group }}</p>
             <div class="tags">
                 <Tag
                     v-for="tag in monitor.tags"
@@ -14,32 +12,28 @@
                     :size="'sm'"
                 />
             </div>
-            <p class="url" v-if="monitor.type !== 'group'">
+            <p v-if="monitor.type !== 'group'" class="url">
                 {{ $t("Hostname") }}:
                 <a
                     v-if="
                         monitor.type === 'http' ||
-                        monitor.type === 'keyword' ||
-                        monitor.type === 'json-query' ||
-                        monitor.type === 'mp-health' ||
-                        monitor.type === 'real-browser' ||
-                        monitor.type === 'real-browser-keyword'
+                            monitor.type === 'keyword' ||
+                            monitor.type === 'json-query' ||
+                            monitor.type === 'mp-health' ||
+                            monitor.type === 'real-browser' ||
+                            monitor.type === 'real-browser-keyword'
                     "
                     :href="monitor.url"
                     target="_blank"
                     rel="noopener noreferrer"
-                    >{{ filterPassword(monitor.url) }}
+                >{{ filterPassword(monitor.url) }}
                 </a>
-                <span v-if="monitor.type === 'port'"
-                    >TCP Port {{ monitor.hostname }}:{{ monitor.port }}</span
-                >
-                <span v-if="monitor.type === 'ping'"
-                    >Ping: {{ monitor.hostname }}</span
-                >
+                <span v-if="monitor.type === 'port'">TCP Port {{ monitor.hostname }}:{{ monitor.port }}</span>
+                <span v-if="monitor.type === 'ping'">Ping: {{ monitor.hostname }}</span>
                 <span
                     v-if="
                         monitor.type === 'keyword' ||
-                        monitor.type === 'real-browser-keyword'
+                            monitor.type === 'real-browser-keyword'
                     "
                 >
                     <br />
@@ -50,8 +44,7 @@
                         alt="Inverted keyword"
                         class="keyword-inverted"
                     >
-                        ↧</span
-                    >
+                        ↧</span>
                 </span>
                 <span v-if="monitor.type === 'json-query'">
                     <br />
@@ -61,22 +54,16 @@
                     <span>{{ $t("Expected Value") }}:</span>
                     <span class="keyword">{{ monitor.expectedValue }}</span>
                 </span>
-                <span v-if="monitor.type === 'dns'"
-                    >[{{ monitor.dns_resolve_type }}] {{ monitor.hostname }}
+                <span v-if="monitor.type === 'dns'">[{{ monitor.dns_resolve_type }}] {{ monitor.hostname }}
                     <br />
                     <span>{{ $t("Last Result") }}:</span>
                     <span class="keyword">{{ monitor.dns_last_result }}</span>
                 </span>
-                <span v-if="monitor.type === 'docker'"
-                    >Docker container: {{ monitor.docker_container }}</span
-                >
-                <span v-if="monitor.type === 'gamedig'"
-                    >Gamedig - {{ monitor.game }}: {{ monitor.hostname }}:{{
-                        monitor.port
-                    }}</span
-                >
-                <span v-if="monitor.type === 'grpc-keyword'"
-                    >gRPC - {{ filterPassword(monitor.grpcUrl) }}
+                <span v-if="monitor.type === 'docker'">Docker container: {{ monitor.docker_container }}</span>
+                <span v-if="monitor.type === 'gamedig'">Gamedig - {{ monitor.game }}: {{ monitor.hostname }}:{{
+                    monitor.port
+                }}</span>
+                <span v-if="monitor.type === 'grpc-keyword'">gRPC - {{ filterPassword(monitor.grpcUrl) }}
                     <br />
                     <span>{{ $t("Keyword") }}:</span>
                     <span class="keyword">{{ monitor.keyword }}</span>
@@ -84,41 +71,30 @@
                 <span v-if="monitor.type === 'mongodb'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
-                <span v-if="monitor.type === 'mqtt'"
-                    >MQTT: {{ monitor.hostname }}:{{ monitor.port }}/{{
-                        monitor.mqttTopic
-                    }}</span
-                >
+                <span v-if="monitor.type === 'mqtt'">MQTT: {{ monitor.hostname }}:{{ monitor.port }}/{{
+                    monitor.mqttTopic
+                }}</span>
                 <span v-if="monitor.type === 'mysql'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
                 <span v-if="monitor.type === 'postgres'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
-                <span v-if="monitor.type === 'push'"
-                    >Push:
+                <span v-if="monitor.type === 'push'">Push:
                     <a
                         :href="pushURL"
                         target="_blank"
                         rel="noopener noreferrer"
-                        >{{ pushURL }}</a
-                    ></span
-                >
-                <span v-if="monitor.type === 'radius'"
-                    >Radius: {{ filterPassword(monitor.hostname) }}</span
-                >
+                    >{{ pushURL }}</a></span>
+                <span v-if="monitor.type === 'radius'">Radius: {{ filterPassword(monitor.hostname) }}</span>
                 <span v-if="monitor.type === 'redis'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
-                <span v-if="monitor.type === 'sqlserver'"
-                    >SQL Server:
-                    {{ filterPassword(monitor.databaseConnectionString) }}</span
-                >
-                <span v-if="monitor.type === 'steam'"
-                    >Steam Game Server: {{ monitor.hostname }}:{{
-                        monitor.port
-                    }}</span
-                >
+                <span v-if="monitor.type === 'sqlserver'">SQL Server:
+                    {{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'steam'">Steam Game Server: {{ monitor.hostname }}:{{
+                    monitor.port
+                }}</span>
             </p>
             <!-- Stats -->
             <div class="shadow-box big-padding text-center stats">
@@ -130,9 +106,6 @@
                         <h4 class="col-4 col-sm-12">
                             {{ pingTitle(true) }}
                         </h4>
-                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">
-                            ({{ chartPeriodOptions[chartPeriodHrs] }})
-                        </p>
                         <span class="col-4 col-sm-12 num">
                             <CountUp :value="avgPing" />
                         </span>
@@ -142,9 +115,6 @@
                         class="col-12 col-sm col row d-flex align-items-center d-sm-block"
                     >
                         <h4 class="col-4 col-sm-12">{{ $t("Uptime") }}</h4>
-                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">
-                            ({{ chartPeriodOptions[chartPeriodHrs] }})
-                        </p>
                         <span class="col-4 col-sm-12 num">
                             <CountUp :value="uptime" />
                         </span>
@@ -168,55 +138,27 @@
                                 @click.prevent="
                                     toggleCertInfoBox = !toggleCertInfoBox
                                 "
-                                >{{ tlsInfo.certInfo.daysRemaining }}
+                            >{{ tlsInfo.certInfo.daysRemaining }}
                                 {{
                                     $tc("day", tlsInfo.certInfo.daysRemaining)
-                                }}</a
-                            >
+                                }}</a>
                         </span>
                     </div>
                 </div>
             </div>
-
-            <!-- Cert Info Box -->
-            <!-- <transition name="slide-fade" appear>
-                <div
-                    v-if="showCertInfoBox"
-                    class="shadow-box big-padding text-center"
-                >
-                    <div class="row">
-                        <div class="col">
-                            <certificate-info
-                                :certInfo="tlsInfo.certInfo"
-                                :valid="tlsInfo.valid"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </transition> -->
-
             <!-- Ping Chart -->
             <div
-                class="shadow-box big-padding text-center ping-chart-wrapper"
                 v-if="monitor.type !== 'group'"
+                class="shadow-box big-padding text-center ping-chart-wrapper"
             >
                 <div class="row">
                     <div class="col">
-                        <!-- <PingChart :monitor-id="monitor.id" /> -->
                         <div
                             class="chart-wrapper"
                             :class="{ loading: loading }"
                         >
                             <Line :data="chartData" :options="chartOptions" />
                         </div>
-                        <!-- <div>
-                                
-                                    <Line
-                                        :data="chartData"
-                                        :options="chartOptions"
-                                    />
-                                </div>
-                            </div> -->
                     </div>
                 </div>
             </div>
@@ -225,46 +167,29 @@
                     v-for="(item, index) in monitors"
                     :key="index"
                     :monitor="item"
-                    :chartPeriodHrsFilter="chartPeriodHrs"
+                    :chartPeriodOptions="chartPeriodOptions"
+                    :chartPeriodHrs="chartPeriodHrs"
+                    :lastMonthStart="lastMonthStart"
+                    :lastMonthEnd="lastMonthEnd"
+                    :currentQuarterStart="currentQuarterStart"
+                    :currentQuarterEnd="currentQuarterEnd"
+                    :previousQuarterStart="previousQuarterStart"
+                    :previousQuarterEnd="previousQuarterEnd"
+                    :customDateRange="customDateRange"
                     :nested="true"
                 />
             </div>
-            
-            <!-- <div>
-                {{ this.currentQuarterStart.format("LLLL") }}
-                {{ this.currentQuarterEnd.format("LLLL") }}
-                {{ this.previousQuarterStart.format("LLLL") }}
-                {{ this.previousQuarterEnd.format("LLLL") }}
-            </div> -->
         </div>
     </transition>
 </template>
 
 <script>
-import { defineAsyncComponent } from "vue";
-import { useToast } from "vue-toastification";
-const toast = useToast();
-import Confirm from "../components/Confirm.vue";
-import HeartbeatBar from "../components/HeartbeatBar.vue";
-import Status from "../components/Status.vue";
 import Datetime from "../components/Datetime.vue";
 import CountUp from "../components/CountUp.vue";
-import Uptime from "../components/Uptime.vue";
-import Pagination from "v-pagination-3";
-const PingChart = defineAsyncComponent(() =>
-    import("../components/PingChart.vue")
-);
 import Tag from "../components/Tag.vue";
-import CertificateInfo from "../components/CertificateInfo.vue";
 import { getMonitorRelativeURL } from "../util.ts";
 import { URL } from "whatwg-url";
 import { getResBaseURL } from "../util-frontend";
-import { highlight, languages } from "prismjs/components/prism-core";
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-css";
-import { PrismEditor } from "vue-prism-editor";
-import "vue-prism-editor/dist/prismeditor.min.css";
 import {
     BarController,
     BarElement,
@@ -280,7 +205,7 @@ import {
 import "chartjs-adapter-dayjs-4";
 import dayjs from "dayjs";
 import { Line } from "vue-chartjs";
-import { DOWN, PENDING, MAINTENANCE, log, UP } from "../util.ts";
+import { DOWN, PENDING, MAINTENANCE } from "../util.ts";
 Chart.register(
     LineController,
     BarController,
@@ -290,22 +215,14 @@ Chart.register(
     BarElement,
     LinearScale,
     Tooltip,
-    Filler
+    Filler,
 );
 
 export default {
     components: {
-        // Uptime,
         CountUp,
         Datetime,
-        HeartbeatBar,
-        // Confirm,
-        Status,
-        // Pagination,
-        PingChart,
         Tag,
-        CertificateInfo,
-        PrismEditor,
         Line,
     },
     props: {
@@ -315,7 +232,7 @@ export default {
             default: null,
         },
         chartPeriodHrs: {
-            type: String,
+            type: null,
             default: "3",
         },
         nested: {
@@ -328,54 +245,44 @@ export default {
         },
         customDateRange: {
             type: Array,
-            default: [],
+            default: () => [],
+        },
+        lastMonthStart: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        lastMonthEnd: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        currentQuarterStart: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        currentQuarterEnd: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        previousQuarterStart: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        previousQuarterEnd: {
+            type: dayjs.Dayjs,
+            default: null,
         },
     },
     data() {
         return {
-            // page: 1,
-            // perPage: 25,
             heartBeatList: [],
             toggleCertInfoBox: false,
             showPingChartBox: true,
-            // paginationConfig: {
-            //     hideCount: true,
-            //     chunksNavigation: "scroll",
-            // },
             cacheTime: Date.now(),
-            // importantHeartBeatListLength: 0,
-            // displayedRecords: [],
-            // pushMonitor: {
-            //     showPushExamples: false,
-            //     currentExample: "javascript-fetch",
-            //     code: "",
-            // },
-            //NEW
             loading: false,
-            // A heartbeatList for 3h, 6h, 24h, 1w
-            // Uses the $root.heartbeatList when value is null
             heartbeatListChart: null,
         };
     },
     computed: {
-        lastMonthStart() {
-            return dayjs().subtract(1, "month").startOf("month");
-        },
-        lastMonthEnd() {
-            return dayjs().subtract(1, "month").endOf("month");
-        },
-        currentQuarterStart() {
-            return dayjs().startOf("quarter");
-        },
-        currentQuarterEnd() {
-            return dayjs().endOf("quarter");
-        },
-        previousQuarterStart() {
-            return dayjs().subtract(1, "quarter").startOf("quarter");
-        },
-        previousQuarterEnd() {
-            return dayjs().subtract(1, "quarter").endOf("quarter");
-        },
         monitors() {
             let monitors = [];
             if (this.monitor.type === "group") {
@@ -410,12 +317,11 @@ export default {
             return this.$t("notAvailableShort");
         },
         uptime() {
-            // console.log(this.heartbeatListChart);
             if (
                 !this.heartbeatListChart ||
                 this.heartbeatListChart.length <= 0
             ) {
-                return this.$t("notAvailableShort");
+                return this.$t("No Data");
             }
             let ut = 0;
             this.heartbeatListChart.forEach((h) => {
@@ -428,43 +334,18 @@ export default {
             return ut.toFixed(2).toString() + "%";
         },
         avgPing() {
-            // console.log("avgPing");
-            // console.log(this.monitor.id);
-            // console.log(this.chartPeriodHrs);
-            // console.log(this.heartbeatListChart);
             if (
                 !this.heartbeatListChart ||
                 this.heartbeatListChart.length <= 0
             ) {
-                // return this.$t("notAvailableShort");
                 return this.ping;
             }
             let avgPing = 0;
             this.heartbeatListChart.forEach((h) => {
-                // console.log(h);
                 avgPing += h.ping;
             });
             avgPing = avgPing / this.heartbeatListChart.length;
-            // console.log(avgPing);
             return avgPing.toFixed(3).toString() + " ms";
-            // let data = null;
-            // switch (this.chartPeriodHrs) {
-            //     case 168:
-            //         data = this.$root.get7Day();
-            //         break;
-            //     default:
-            //         break;
-            // }
-            // console.log(data);
-
-            // if (
-            //     this.$root.avgPingList[this.monitor.id] ||
-            //     this.$root.avgPingList[this.monitor.id] === 0
-            // ) {
-            //     return this.$root.avgPingList[this.monitor.id];
-            // }
-
-            // return this.$t("notAvailableShort");
         },
         status() {
             if (this.$root.statusList[this.monitor.id]) {
@@ -495,25 +376,9 @@ export default {
             }
             return this.monitor.pathName.substr(
                 0,
-                this.monitor.pathName.lastIndexOf("/")
+                this.monitor.pathName.lastIndexOf("/"),
             );
         },
-        // pushURL() {
-        //     return (
-        //         this.$root.baseURL +
-        //         "/api/push/" +
-        //         this.monitor.pushToken +
-        //         "?status=up&msg=OK&ping="
-        //     );
-        // },
-        // screenshotURL() {
-        //     return (
-        //         getResBaseURL() +
-        //         this.monitor.screenshot +
-        //         "?time=" +
-        //         this.cacheTime
-        //     );
-        // },
         chartOptions() {
             return {
                 responsive: true,
@@ -619,7 +484,7 @@ export default {
                         callbacks: {
                             label: (context) => {
                                 return ` ${new Intl.NumberFormat().format(
-                                    context.parsed.y
+                                    context.parsed.y,
                                 )} ms`;
                             },
                         },
@@ -641,43 +506,29 @@ export default {
                     this.$root.heartbeatList[this.monitor.id]) ||
                 [];
 
-            heartbeatListChart
-                .filter(
-                    // Filtering as data gets appended
-                    // not the most efficient, but works for now
-                    (beat) => dayjs.utc(beat.time).tz(this.$root.timezone)
-                    // .isAfter(
-                    //     dayjs().subtract(
-                    //         Math.max(this.chartPeriodHrs, 6),
-                    //         "hours"
-                    //     )
-                    // )
-                )
-                .map((beat) => {
-                    const x = this.$root.datetime(beat.time);
-                    pingData.push({
-                        x,
-                        y: beat.ping,
-                    });
-                    downData.push({
-                        x,
-                        y:
-                            beat.status === DOWN ||
-                            beat.status === MAINTENANCE ||
-                            beat.status === PENDING
-                                ? 1
-                                : 0,
-                    });
-                    colorData.push(
-                        beat.status === MAINTENANCE
-                            ? "rgba(23,71,245,0.41)"
-                            : beat.status === PENDING
-                            ? "rgba(245,182,23,0.41)"
-                            : "#DC354568"
-                    );
+            heartbeatListChart.map((beat) => {
+                const x = this.$root.datetime(beat.time);
+                pingData.push({
+                    x,
+                    y: beat.ping,
                 });
-            // console.log(pingData);
-
+                downData.push({
+                    x,
+                    y:
+                        beat.status === DOWN ||
+                        beat.status === MAINTENANCE ||
+                        beat.status === PENDING
+                            ? 1
+                            : 0,
+                });
+                colorData.push(
+                    beat.status === MAINTENANCE
+                        ? "rgba(23,71,245,0.41)"
+                        : beat.status === PENDING
+                            ? "rgba(245,182,23,0.41)"
+                            : "#DC354568",
+                );
+            });
             return {
                 datasets: [
                     {
@@ -708,13 +559,26 @@ export default {
         },
     },
     watch: {
-        // chartPeriodHrsFilter: function (newPeriod) {
-        //     this.chartPeriodHrs = newPeriod;
-        // },
+        customDateRange: function (newDates) {
+            if (this.chartPeriodHrs === "c" && newDates.length > 0) {
+                this.loading = true;
+                this.$root.getMonitorBeatsRange(
+                    this.monitor.id,
+                    newDates[0].toISOString(),
+                    newDates[1].toISOString(),
+                    (res) => {
+                        if (!res.ok) {
+                            this.$root.toastError(res.msg);
+                        } else {
+                            this.heartbeatListChart = res.data;
+                        }
+                        this.loading = false;
+                    },
+                );
+            }
+        },
         // Update chart data when the selected chart period changes
         chartPeriodHrs: function (newPeriod) {
-            // console.log(newPeriod);
-            // console.log(this.monitor.id);
             if (newPeriod === "0") {
                 this.heartbeatListChart = null;
                 this.$root
@@ -734,7 +598,7 @@ export default {
                         }
                         this.loading = false;
                         // console.log(this.heartbeatListChart);
-                    }
+                    },
                 );
             } else {
                 this.loading = true;
@@ -753,10 +617,8 @@ export default {
                                 ] = newPeriod;
                             }
                             this.loading = false;
-                            // console.log(this.heartbeatListChart);
-                        }
+                        },
                     );
-                    // this.loading = false;
                 } else if (newPeriod === "cq") {
                     this.$root.getMonitorBeatsRange(
                         this.monitor.id,
@@ -773,17 +635,14 @@ export default {
                                 ] = newPeriod;
                             }
                             this.loading = false;
-                            // console.log(this.heartbeatListChart);
-                        }
+                        },
                     );
-                    // this.loading = false;
                 } else if (newPeriod === "lq") {
                     this.$root.getMonitorBeatsRange(
                         this.monitor.id,
                         this.previousQuarterStart.toISOString(),
                         this.previousQuarterEnd.toISOString(),
                         (res) => {
-                            // console.log(res.data);
                             if (!res.ok) {
                                 this.$root.toastError(res.msg);
                             } else {
@@ -793,12 +652,10 @@ export default {
                                 ] = newPeriod;
                             }
                             this.loading = false;
-                            // console.log(this.heartbeatListChart);
-                        }
+                        },
                     );
                 } else if (newPeriod === "c") {
-                    // TODO
-                    console.log("TODO: Compute Custom");
+                    // Do Nothing here, we need to wait on the custom date range.
                     this.loading = false;
                 } else {
                     this.$root.getMonitorBeats(
@@ -814,53 +671,14 @@ export default {
                                 ] = newPeriod;
                             }
                             this.loading = false;
-                            // console.log(this.heartbeatListChart);
-                        }
+                        },
                     );
                 }
             }
             this.avgPing;
             this.uptime;
-            this.reportDate;
         },
-        //     page(to) {
-        //         this.getImportantHeartbeatListPaged();
-        //     },
-
-        //     monitor(to) {
-        //         this.getImportantHeartbeatListLength();
-        //     },
-        //     "monitor.type"() {
-        //         if (this.monitor && this.monitor.type === "push") {
-        //             this.loadPushExample();
-        //         }
-        //     },
-        //     "pushMonitor.currentExample"() {
-        //         this.loadPushExample();
-        //     },
     },
-    // mounted() {
-    //     this.getImportantHeartbeatListLength();
-
-    //     this.$root.emitter.on(
-    //         "newImportantHeartbeat",
-    //         this.onNewImportantHeartbeat
-    //     );
-
-    //     // if (this.monitor && this.monitor.type === "push") {
-    //     //     if (this.lastHeartBeat.status === -1) {
-    //     //         this.pushMonitor.showPushExamples = true;
-    //     //     }
-    //     //     this.loadPushExample();
-    //     // }
-    // },
-
-    // beforeUnmount() {
-    //     this.$root.emitter.off(
-    //         "newImportantHeartbeat",
-    //         this.onNewImportantHeartbeat
-    //     );
-    // },
     methods: {
         getResBaseURL,
         /**
@@ -916,147 +734,17 @@ export default {
                 // Handle SQL Server
                 return urlString.replaceAll(
                     /Password=(.+);/gi,
-                    "Password=******;"
+                    "Password=******;",
                 );
             }
         },
-
-        // /**
-        //  * Retrieves the length of the important heartbeat list for this monitor.
-        //  * @returns {void}
-        //  */
-        // getImportantHeartbeatListLength() {
-        //     if (this.monitor) {
-        //         this.$root
-        //             .getSocket()
-        //             .emit(
-        //                 "monitorImportantHeartbeatListCount",
-        //                 this.monitor.id,
-        //                 (res) => {
-        //                     if (res.ok) {
-        //                         this.importantHeartBeatListLength = res.count;
-        //                         this.getImportantHeartbeatListPaged();
-        //                     }
-        //                 }
-        //             );
-        //     }
-        // },
-
-        // /**
-        //  * Retrieves the important heartbeat list for the current page.
-        //  * @returns {void}
-        //  */
-        // getImportantHeartbeatListPaged() {
-        //     if (this.monitor) {
-        //         const offset = (this.page - 1) * this.perPage;
-        //         this.$root
-        //             .getSocket()
-        //             .emit(
-        //                 "monitorImportantHeartbeatListPaged",
-        //                 this.monitor.id,
-        //                 offset,
-        //                 this.perPage,
-        //                 (res) => {
-        //                     if (res.ok) {
-        //                         this.displayedRecords = res.data;
-        //                     }
-        //                 }
-        //             );
-        //     }
-        // },
-
-        // /**
-        //  * Updates the displayed records when a new important heartbeat arrives.
-        //  * @param {object} heartbeat - The heartbeat object received.
-        //  * @returns {void}
-        //  */
-        // onNewImportantHeartbeat(heartbeat) {
-        //     if (heartbeat.monitorID === this.monitor?.id) {
-        //         if (this.page === 1) {
-        //             this.displayedRecords.unshift(heartbeat);
-        //             if (this.displayedRecords.length > this.perPage) {
-        //                 this.displayedRecords.pop();
-        //             }
-        //             this.importantHeartBeatListLength += 1;
-        //         }
-        //     }
-        // },
-
-        // /**
-        //  * Highlight the example code
-        //  * @param {string} code Code
-        //  * @returns {string} Highlighted code
-        //  */
-        // pushExampleHighlighter(code) {
-        //     return highlight(code, languages.js);
-        // },
-
-        // loadPushExample() {
-        //     this.pushMonitor.code = "";
-        //     this.$root
-        //         .getSocket()
-        //         .emit(
-        //             "getPushExample",
-        //             this.pushMonitor.currentExample,
-        //             (res) => {
-        //                 let code = res.code
-        //                     .replace("60", this.monitor.interval)
-        //                     .replace(
-        //                         "https://example.com/api/push/key?status=up&msg=OK&ping=",
-        //                         this.pushURL
-        //                     );
-        //                 this.pushMonitor.code = code;
-        //             }
-        //         );
-        // },
     },
-    // created() {
-    //     // Setup Watcher on the root heartbeatList,
-    //     // And mirror latest change to this.heartbeatList
-    //     // this.$watch(
-    //     //     () => this.$root.heartbeatList[this.$route.params.id],
-    //     //     (heartbeatList) => {
-    //     //         // log.debug(
-    //     //         //     "ping_chart",
-    //     //         //     `this.chartPeriodHrs type ${typeof this
-    //     //         //         .chartPeriodHrs}, value: ${this.chartPeriodHrs}`
-    //     //         // );
-
-    //     //         // eslint-disable-next-line eqeqeq
-    //     //         if (this.chartPeriodHrs != "0") {
-    //     //             const newBeat = heartbeatList.at(-1);
-
-    //     //             if (
-    //     //                 newBeat &&
-    //     //                 dayjs.utc(newBeat.time) >
-    //     //                     dayjs.utc(this.heartbeatListChart?.at(-1)?.time)
-    //     //             ) {
-    //     //                 this.heartbeatListChart.push(heartbeatList.at(-1));
-    //     //             }
-    //     //         }
-    //     //     },
-    //     //     { deep: true }
-    //     // );
-
-    //     // Load chart period from storage if saved
-    //     this.chartPeriodHrs = this.chartPeriodHrsFilter;
-    //     let period =
-    //         this.$root.storage()[`report-period-${this.$route.params.id}`];
-    //     // console.log(period);
-    //     if (period != null) {
-    //         if (!isNaN(period)) {
-    //             this.chartPeriodHrs = Math.min(period, 6).toString();
-    //         } else {
-    //             this.chartPeriodHrs = period;
-    //         }
-    //     }
-    // },
 };
 </script>
 
 <style lang="scss">
 @media print {
-    .printMe {
+    .print-me {
         background-color: white;
         position: absolute;
         top: 0;
@@ -1066,17 +754,21 @@ export default {
         height: 100%;
         padding: 10px;
     }
+
     header.d-flex {
         display: none !important;
         height: 0;
     }
+
     main {
         position: relative;
         height: 0;
     }
+
     main div.shadow-box.mb-3 {
         display: none;
     }
+
     div#app {
         // display: none;
         position: relative;
