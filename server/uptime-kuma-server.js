@@ -60,8 +60,6 @@ class UptimeKumaServer {
      */
     jwtSecret = null;
 
-    checkMonitorsInterval = null;
-
     /**
      * Get the current instance of the server if it exists, otherwise
      * create a new instance.
@@ -413,10 +411,6 @@ class UptimeKumaServer {
         if (enable || enable === null) {
             this.startNSCDServices();
         }
-
-        this.checkMonitorsInterval = setInterval(() => {
-            this.checkMonitors();
-        }, 60 * 1000);
     }
 
     /**
@@ -429,8 +423,6 @@ class UptimeKumaServer {
         if (enable || enable === null) {
             this.stopNSCDServices();
         }
-
-        clearInterval(this.checkMonitorsInterval);
     }
 
     /**
