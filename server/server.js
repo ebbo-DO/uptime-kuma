@@ -32,7 +32,7 @@ const requiredNodeVersionsComma = requiredNodeVersions
 if (semver.satisfies(nodeVersion, bannedNodeVersions)) {
     console.error(
         "\x1b[31m%s\x1b[0m",
-        `Error: Your Node.js version: ${nodeVersion} is not supported, please upgrade your Node.js to ${requiredNodeVersionsComma}.`
+        `Error: Your Node.js version: ${nodeVersion} is not supported, please upgrade your Node.js to ${requiredNodeVersionsComma}.`,
     );
     process.exit(-1);
 }
@@ -41,7 +41,7 @@ if (semver.satisfies(nodeVersion, bannedNodeVersions)) {
 if (!semver.satisfies(nodeVersion, requiredNodeVersions)) {
     console.warn(
         "\x1b[31m%s\x1b[0m",
-        `Warning: Your Node.js version: ${nodeVersion} is not officially supported, please upgrade your Node.js to ${requiredNodeVersionsComma}.`
+        `Warning: Your Node.js version: ${nodeVersion} is not officially supported, please upgrade your Node.js to ${requiredNodeVersionsComma}.`,
     );
 }
 
@@ -58,7 +58,7 @@ if (!process.env.NODE_ENV) {
 log.info("server", "Env: " + process.env.NODE_ENV);
 log.debug(
     "server",
-    "Inside Container: " + (process.env.UPTIME_KUMA_IS_CONTAINER === "1")
+    "Inside Container: " + (process.env.UPTIME_KUMA_IS_CONTAINER === "1"),
 );
 
 const checkVersion = require("./check-version");
@@ -133,7 +133,7 @@ if (hostname) {
     log.info("server", "Custom hostname: " + hostname);
 }
 
-const port = [args.port, process.env.UPTIME_KUMA_PORT, process.env.PORT, 3001]
+const port = [ args.port, process.env.UPTIME_KUMA_PORT, process.env.PORT, 3001 ]
     .map((portValue) => parseInt(portValue))
     .find((portValue) => !isNaN(portValue));
 
@@ -268,14 +268,14 @@ let needSetup = false;
             await StatusPage.handleStatusPageResponse(
                 response,
                 server.indexHTML,
-                slug
+                slug,
             );
         } else if (
             uptimeKumaEntryPage &&
             uptimeKumaEntryPage.startsWith("statusPage-")
         ) {
             response.redirect(
-                "/status/" + uptimeKumaEntryPage.replace("statusPage-", "")
+                "/status/" + uptimeKumaEntryPage.replace("statusPage-", ""),
             );
         } else {
             response.redirect("/dashboard");
@@ -325,7 +325,7 @@ let needSetup = false;
         "/",
         expressStaticGzip("dist", {
             enableBrotli: true,
-        })
+        }),
     );
 
     // ./data/upload
@@ -333,7 +333,7 @@ let needSetup = false;
 
     app.get("/.well-known/change-password", async (_, response) => {
         response.redirect(
-            "https://github.com/louislam/uptime-kuma/wiki/Reset-Password-via-CLI"
+            "https://github.com/louislam/uptime-kuma/wiki/Reset-Password-via-CLI",
         );
     });
 
@@ -380,7 +380,7 @@ let needSetup = false;
                 let user = await R.findOne(
                     "user",
                     " username = ? AND active = 1 ",
-                    [decoded.username]
+                    [ decoded.username ],
                 );
 
                 if (user) {
@@ -389,7 +389,7 @@ let needSetup = false;
                         decoded.h !== shake256(user.password, SHAKE256_LENGTH)
                     ) {
                         throw new Error(
-                            "The token is invalid due to password change or old token"
+                            "The token is invalid due to password change or old token",
                         );
                     }
 
@@ -399,7 +399,7 @@ let needSetup = false;
 
                     log.info(
                         "auth",
-                        `Successfully logged in user ${decoded.username}. IP=${clientIP}`
+                        `Successfully logged in user ${decoded.username}. IP=${clientIP}`,
                     );
 
                     callback({
@@ -408,7 +408,7 @@ let needSetup = false;
                 } else {
                     log.info(
                         "auth",
-                        `Inactive or deleted user ${decoded.username}. IP=${clientIP}`
+                        `Inactive or deleted user ${decoded.username}. IP=${clientIP}`,
                     );
 
                     callback({
@@ -448,7 +448,7 @@ let needSetup = false;
             if (!(await loginRateLimiter.pass(callback))) {
                 log.info(
                     "auth",
-                    `Too many failed requests for user ${data.username}. IP=${clientIP}`
+                    `Too many failed requests for user ${data.username}. IP=${clientIP}`,
                 );
                 return;
             }
@@ -461,7 +461,7 @@ let needSetup = false;
 
                     log.info(
                         "auth",
-                        `Successfully logged in user ${data.username}. IP=${clientIP}`
+                        `Successfully logged in user ${data.username}. IP=${clientIP}`,
                     );
 
                     callback({
@@ -473,7 +473,7 @@ let needSetup = false;
                 if (user.twofa_status === 1 && !data.token) {
                     log.info(
                         "auth",
-                        `2FA token required for user ${data.username}. IP=${clientIP}`
+                        `2FA token required for user ${data.username}. IP=${clientIP}`,
                     );
 
                     callback({
@@ -485,7 +485,7 @@ let needSetup = false;
                     let verify = notp.totp.verify(
                         data.token,
                         user.twofa_secret,
-                        twoFAVerifyOptions
+                        twoFAVerifyOptions,
                     );
 
                     if (user.twofa_last_token !== data.token && verify) {
@@ -493,12 +493,12 @@ let needSetup = false;
 
                         await R.exec(
                             "UPDATE `user` SET twofa_last_token = ? WHERE id = ? ",
-                            [data.token, socket.userID]
+                            [ data.token, socket.userID ],
                         );
 
                         log.info(
                             "auth",
-                            `Successfully logged in user ${data.username}. IP=${clientIP}`
+                            `Successfully logged in user ${data.username}. IP=${clientIP}`,
                         );
 
                         callback({
@@ -508,7 +508,7 @@ let needSetup = false;
                     } else {
                         log.warn(
                             "auth",
-                            `Invalid token provided for user ${data.username}. IP=${clientIP}`
+                            `Invalid token provided for user ${data.username}. IP=${clientIP}`,
                         );
 
                         callback({
@@ -521,7 +521,7 @@ let needSetup = false;
             } else {
                 log.warn(
                     "auth",
-                    `Incorrect username or password for user ${data.username}. IP=${clientIP}`
+                    `Incorrect username or password for user ${data.username}. IP=${clientIP}`,
                 );
 
                 callback({
@@ -572,7 +572,7 @@ let needSetup = false;
 
                     await R.exec(
                         "UPDATE `user` SET twofa_secret = ? WHERE id = ? ",
-                        [newSecret, socket.userID]
+                        [ newSecret, socket.userID ],
                     );
 
                     callback({
@@ -607,7 +607,7 @@ let needSetup = false;
 
                 await R.exec(
                     "UPDATE `user` SET twofa_status = 1 WHERE id = ? ",
-                    [socket.userID]
+                    [ socket.userID ],
                 );
 
                 log.info("auth", `Saved 2FA token. IP=${clientIP}`);
@@ -668,7 +668,7 @@ let needSetup = false;
                 let verify = notp.totp.verify(
                     token,
                     user.twofa_secret,
-                    twoFAVerifyOptions
+                    twoFAVerifyOptions,
                 );
 
                 if (user.twofa_last_token !== token && verify) {
@@ -727,7 +727,7 @@ let needSetup = false;
             try {
                 if (passwordStrength(password).value === "Too weak") {
                     throw new Error(
-                        "Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length."
+                        "Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length.",
                     );
                 }
 
@@ -736,7 +736,7 @@ let needSetup = false;
                         .count !== 0
                 ) {
                     throw new Error(
-                        "Uptime Kuma has been initialized. If you want to run setup again, please delete the database."
+                        "Uptime Kuma has been initialized. If you want to run setup again, please delete the database.",
                     );
                 }
 
@@ -776,23 +776,23 @@ let needSetup = false;
                 // Ensure status code ranges are strings
                 if (
                     !monitor.accepted_statuscodes.every(
-                        (code) => typeof code === "string"
+                        (code) => typeof code === "string",
                     )
                 ) {
                     throw new Error(
-                        "Accepted status codes are not all strings"
+                        "Accepted status codes are not all strings",
                     );
                 }
                 monitor.accepted_statuscodes_json = JSON.stringify(
-                    monitor.accepted_statuscodes
+                    monitor.accepted_statuscodes,
                 );
                 delete monitor.accepted_statuscodes;
 
                 monitor.kafkaProducerBrokers = JSON.stringify(
-                    monitor.kafkaProducerBrokers
+                    monitor.kafkaProducerBrokers,
                 );
                 monitor.kafkaProducerSaslOptions = JSON.stringify(
-                    monitor.kafkaProducerSaslOptions
+                    monitor.kafkaProducerSaslOptions,
                 );
 
                 bean.import(monitor);
@@ -812,7 +812,7 @@ let needSetup = false;
 
                 log.info(
                     "monitor",
-                    `Added Monitor: ${monitor.id} User ID: ${socket.userID}`
+                    `Added Monitor: ${monitor.id} User ID: ${socket.userID}`,
                 );
 
                 callback({
@@ -824,7 +824,7 @@ let needSetup = false;
             } catch (e) {
                 log.error(
                     "monitor",
-                    `Error adding Monitor: ${monitor.id} User ID: ${socket.userID}`
+                    `Error adding Monitor: ${monitor.id} User ID: ${socket.userID}`,
                 );
 
                 callback({
@@ -840,7 +840,7 @@ let needSetup = false;
                 let removeGroupChildren = false;
                 checkLogin(socket);
 
-                let bean = await R.findOne("monitor", " id = ? ", [monitor.id]);
+                let bean = await R.findOne("monitor", " id = ? ", [ monitor.id ]);
 
                 if (bean.user_id !== socket.userID) {
                     throw new Error("Permission denied.");
@@ -849,7 +849,7 @@ let needSetup = false;
                 // Check if Parent is Descendant (would cause endless loop)
                 if (monitor.parent !== null) {
                     const childIDs = await Monitor.getAllChildrenIDs(
-                        monitor.id
+                        monitor.id,
                     );
                     if (childIDs.includes(monitor.parent)) {
                         throw new Error("Invalid Monitor Group");
@@ -864,11 +864,11 @@ let needSetup = false;
                 // Ensure status code ranges are strings
                 if (
                     !monitor.accepted_statuscodes.every(
-                        (code) => typeof code === "string"
+                        (code) => typeof code === "string",
                     )
                 ) {
                     throw new Error(
-                        "Accepted status codes are not all strings"
+                        "Accepted status codes are not all strings",
                     );
                 }
 
@@ -911,7 +911,7 @@ let needSetup = false;
                 bean.packetSize = monitor.packetSize;
                 bean.maxredirects = monitor.maxredirects;
                 bean.accepted_statuscodes_json = JSON.stringify(
-                    monitor.accepted_statuscodes
+                    monitor.accepted_statuscodes,
                 );
                 bean.dns_resolve_type = monitor.dns_resolve_type;
                 bean.dns_resolve_server = monitor.dns_resolve_server;
@@ -948,12 +948,12 @@ let needSetup = false;
                 bean.jsonPath = monitor.jsonPath;
                 bean.kafkaProducerTopic = monitor.kafkaProducerTopic;
                 bean.kafkaProducerBrokers = JSON.stringify(
-                    monitor.kafkaProducerBrokers
+                    monitor.kafkaProducerBrokers,
                 );
                 bean.kafkaProducerAllowAutoTopicCreation =
                     monitor.kafkaProducerAllowAutoTopicCreation;
                 bean.kafkaProducerSaslOptions = JSON.stringify(
-                    monitor.kafkaProducerSaslOptions
+                    monitor.kafkaProducerSaslOptions,
                 );
                 bean.kafkaProducerMessage = monitor.kafkaProducerMessage;
                 bean.kafkaProducerSsl = monitor.kafkaProducerSsl;
@@ -971,7 +971,7 @@ let needSetup = false;
 
                 await updateMonitorNotification(
                     bean.id,
-                    monitor.notificationIDList
+                    monitor.notificationIDList,
                 );
 
                 if (await bean.isActive()) {
@@ -1017,13 +1017,13 @@ let needSetup = false;
 
                 log.info(
                     "monitor",
-                    `Get Monitor: ${monitorID} User ID: ${socket.userID}`
+                    `Get Monitor: ${monitorID} User ID: ${socket.userID}`,
                 );
 
                 let bean = await R.findOne(
                     "monitor",
                     " id = ? AND user_id = ? ",
-                    [monitorID, socket.userID]
+                    [ monitorID, socket.userID ],
                 );
 
                 callback({
@@ -1044,7 +1044,7 @@ let needSetup = false;
 
                 log.info(
                     "monitor",
-                    `Get Monitor Beats: ${monitorID} User ID: ${socket.userID}`
+                    `Get Monitor Beats: ${monitorID} User ID: ${socket.userID}`,
                 );
 
                 if (period == null) {
@@ -1061,7 +1061,7 @@ let needSetup = false;
                       AND time > ${sqlHourOffset}
                     ORDER BY time ASC
                 `,
-                    [monitorID, -period]
+                    [ monitorID, -period ],
                 );
 
                 callback({
@@ -1083,7 +1083,7 @@ let needSetup = false;
 
                     log.info(
                         "monitor",
-                        `Get Monitor Beats: ${monitorID} User ID: ${socket.userID}`
+                        `Get Monitor Beats: ${monitorID} User ID: ${socket.userID}`,
                     );
 
                     if (startDate == null) {
@@ -1092,7 +1092,7 @@ let needSetup = false;
                     if (endDate == null) {
                         throw new Error("Invalid End Date.");
                     }
-                    
+
                     let list = await R.getAll(
                         `
                     SELECT *
@@ -1101,7 +1101,7 @@ let needSetup = false;
                       AND time BETWEEN ? AND ?
                     ORDER BY time ASC
                 `,
-                        [monitorID, startDate, endDate]
+                        [ monitorID, startDate, endDate ],
                     );
 
                     callback({
@@ -1114,7 +1114,7 @@ let needSetup = false;
                         msg: e.message,
                     });
                 }
-            }
+            },
         );
 
         // Start or Resume the monitor
@@ -1162,7 +1162,7 @@ let needSetup = false;
 
                 log.info(
                     "manage",
-                    `Delete Monitor: ${monitorID} User ID: ${socket.userID}`
+                    `Delete Monitor: ${monitorID} User ID: ${socket.userID}`,
                 );
 
                 if (monitorID in server.monitorList) {
@@ -1174,7 +1174,7 @@ let needSetup = false;
 
                 await R.exec(
                     "DELETE FROM monitor WHERE id = ? AND user_id = ? ",
-                    [monitorID, socket.userID]
+                    [ monitorID, socket.userID ],
                 );
 
                 // Fix #2880
@@ -1184,7 +1184,7 @@ let needSetup = false;
 
                 log.info(
                     "DB",
-                    `Delete Monitor completed in : ${endTime - startTime} ms`
+                    `Delete Monitor completed in : ${endTime - startTime} ms`,
                 );
 
                 callback({
@@ -1245,7 +1245,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                let bean = await R.findOne("tag", " id = ? ", [tag.id]);
+                let bean = await R.findOne("tag", " id = ? ", [ tag.id ]);
                 if (bean == null) {
                     callback({
                         ok: false,
@@ -1276,7 +1276,7 @@ let needSetup = false;
             try {
                 checkLogin(socket);
 
-                await R.exec("DELETE FROM tag WHERE id = ? ", [tagID]);
+                await R.exec("DELETE FROM tag WHERE id = ? ", [ tagID ]);
 
                 callback({
                     ok: true,
@@ -1299,7 +1299,7 @@ let needSetup = false;
 
                     await R.exec(
                         "INSERT INTO monitor_tag (tag_id, monitor_id, value) VALUES (?, ?, ?)",
-                        [tagID, monitorID, value]
+                        [ tagID, monitorID, value ],
                     );
 
                     callback({
@@ -1313,7 +1313,7 @@ let needSetup = false;
                         msg: e.message,
                     });
                 }
-            }
+            },
         );
 
         socket.on(
@@ -1324,7 +1324,7 @@ let needSetup = false;
 
                     await R.exec(
                         "UPDATE monitor_tag SET value = ? WHERE tag_id = ? AND monitor_id = ?",
-                        [value, tagID, monitorID]
+                        [ value, tagID, monitorID ],
                     );
 
                     callback({
@@ -1338,7 +1338,7 @@ let needSetup = false;
                         msg: e.message,
                     });
                 }
-            }
+            },
         );
 
         socket.on(
@@ -1349,7 +1349,7 @@ let needSetup = false;
 
                     await R.exec(
                         "DELETE FROM monitor_tag WHERE tag_id = ? AND monitor_id = ? AND value = ?",
-                        [tagID, monitorID, value]
+                        [ tagID, monitorID, value ],
                     );
 
                     callback({
@@ -1363,7 +1363,7 @@ let needSetup = false;
                         msg: e.message,
                     });
                 }
-            }
+            },
         );
 
         socket.on(
@@ -1379,7 +1379,7 @@ let needSetup = false;
                         count = await R.count(
                             "heartbeat",
                             "monitor_id = ? AND important = 1",
-                            [monitorID]
+                            [ monitorID ],
                         );
                     }
 
@@ -1393,7 +1393,7 @@ let needSetup = false;
                         msg: e.message,
                     });
                 }
-            }
+            },
         );
 
         socket.on(
@@ -1412,7 +1412,7 @@ let needSetup = false;
                         LIMIT ?
                         OFFSET ?
                     `,
-                            [count, offset]
+                            [ count, offset ],
                         );
                     } else {
                         list = await R.find(
@@ -1424,7 +1424,7 @@ let needSetup = false;
                         LIMIT ?
                         OFFSET ?
                     `,
-                            [monitorID, count, offset]
+                            [ monitorID, count, offset ],
                         );
                     }
 
@@ -1438,7 +1438,7 @@ let needSetup = false;
                         msg: e.message,
                     });
                 }
-            }
+            },
         );
 
         socket.on("changePassword", async (password, callback) => {
@@ -1453,13 +1453,13 @@ let needSetup = false;
                     passwordStrength(password.newPassword).value === "Too weak"
                 ) {
                     throw new Error(
-                        "Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length."
+                        "Password is too weak. It should contain alphabetic and numeric characters. It must be at least 6 characters in length.",
                     );
                 }
 
                 let user = await doubleCheckPassword(
                     socket,
-                    password.currentPassword
+                    password.currentPassword,
                 );
                 await user.resetPassword(password.newPassword);
 
@@ -1512,7 +1512,7 @@ let needSetup = false;
                 }
 
                 const previousChromeExecutable = await Settings.get(
-                    "chromeExecutable"
+                    "chromeExecutable",
                 );
                 const previousNSCDStatus = await Settings.get("nscd");
 
@@ -1530,7 +1530,7 @@ let needSetup = false;
                 if (previousChromeExecutable !== data.chromeExecutable) {
                     log.info(
                         "settings",
-                        "Chrome executable is changed. Resetting Chrome..."
+                        "Chrome executable is changed. Resetting Chrome...",
                     );
                     await resetChrome();
                 }
@@ -1570,7 +1570,7 @@ let needSetup = false;
                     let notificationBean = await Notification.save(
                         notification,
                         notificationID,
-                        socket.userID
+                        socket.userID,
                     );
                     await sendNotificationList(socket);
 
@@ -1586,7 +1586,7 @@ let needSetup = false;
                         msg: e.message,
                     });
                 }
-            }
+            },
         );
 
         socket.on("deleteNotification", async (notificationID, callback) => {
@@ -1615,7 +1615,7 @@ let needSetup = false;
 
                 let msg = await Notification.send(
                     notification,
-                    notification.name + " Testing"
+                    notification.name + " Testing",
                 );
 
                 callback({
@@ -1647,12 +1647,12 @@ let needSetup = false;
 
                 log.info(
                     "manage",
-                    `Clear Events Monitor: ${monitorID} User ID: ${socket.userID}`
+                    `Clear Events Monitor: ${monitorID} User ID: ${socket.userID}`,
                 );
 
                 await R.exec(
                     "UPDATE heartbeat SET msg = ?, important = ? WHERE monitor_id = ? ",
-                    ["", "0", monitorID]
+                    [ "", "0", monitorID ],
                 );
 
                 callback({
@@ -1672,7 +1672,7 @@ let needSetup = false;
 
                 log.info(
                     "manage",
-                    `Clear Heartbeats Monitor: ${monitorID} User ID: ${socket.userID}`
+                    `Clear Heartbeats Monitor: ${monitorID} User ID: ${socket.userID}`,
                 );
 
                 await R.exec("DELETE FROM heartbeat WHERE monitor_id = ?", [
@@ -1698,7 +1698,7 @@ let needSetup = false;
 
                 log.info(
                     "manage",
-                    `Clear Statistics User ID: ${socket.userID}`
+                    `Clear Statistics User ID: ${socket.userID}`,
                 );
 
                 await R.exec("DELETE FROM heartbeat");
@@ -1802,7 +1802,7 @@ async function updateMonitorNotification(monitorID, notificationIDList) {
 async function checkOwner(userID, monitorID) {
     let row = await R.getRow(
         "SELECT id FROM monitor WHERE id = ? AND user_id = ? ",
-        [monitorID, userID]
+        [ monitorID, userID ],
     );
 
     if (!row) {
@@ -1897,10 +1897,10 @@ async function startMonitor(userID, monitorID) {
 
     await R.exec(
         "UPDATE monitor SET active = 1 WHERE id = ? AND user_id = ? ",
-        [monitorID, userID]
+        [ monitorID, userID ],
     );
 
-    let monitor = await R.findOne("monitor", " id = ? ", [monitorID]);
+    let monitor = await R.findOne("monitor", " id = ? ", [ monitorID ]);
 
     if (monitor.id in server.monitorList) {
         server.monitorList[monitor.id].stop();
@@ -1933,7 +1933,7 @@ async function pauseMonitor(userID, monitorID) {
 
     await R.exec(
         "UPDATE monitor SET active = 0 WHERE id = ? AND user_id = ? ",
-        [monitorID, userID]
+        [ monitorID, userID ],
     );
 
     if (monitorID in server.monitorList) {
@@ -2011,7 +2011,7 @@ let unexpectedErrorHandler = (error, promise) => {
     console.trace(error);
     UptimeKumaServer.errorLog(error, false);
     console.error(
-        "If you keep encountering errors, please report to https://github.com/louislam/uptime-kuma/issues"
+        "If you keep encountering errors, please report to https://github.com/louislam/uptime-kuma/issues",
     );
 };
 process.addListener("unhandledRejection", unexpectedErrorHandler);

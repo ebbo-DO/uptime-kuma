@@ -112,7 +112,7 @@ class UptimeKumaServer {
                     cert: fs.readFileSync(sslCert),
                     passphrase: sslKeyPassphrase,
                 },
-                this.app
+                this.app,
             );
         } else {
             log.info("server", "Server Type: HTTP");
@@ -126,7 +126,7 @@ class UptimeKumaServer {
             if (process.env.NODE_ENV !== "development") {
                 log.error(
                     "server",
-                    "Error: Cannot find 'dist/index.html', did you install correctly?"
+                    "Error: Cannot find 'dist/index.html', did you install correctly?",
                 );
                 process.exit(1);
             }
@@ -186,7 +186,7 @@ class UptimeKumaServer {
         let monitorList = await R.find(
             "monitor",
             " user_id = ? ORDER BY weight DESC, name",
-            [userID]
+            [ userID ],
         );
 
         for (let monitor of monitorList) {
@@ -240,7 +240,7 @@ class UptimeKumaServer {
         let maintenanceList = await R.findAll(
             "maintenance",
             " ORDER BY end_date DESC, title",
-            []
+            [],
         );
 
         for (let maintenance of maintenanceList) {
@@ -272,7 +272,7 @@ class UptimeKumaServer {
             path.join(Database.dataDir, "/error.log"),
             {
                 flags: "a",
-            }
+            },
         );
 
         errorLogStream.on("error", () => {
@@ -363,7 +363,7 @@ class UptimeKumaServer {
             // Guess failed, fall back to UTC
             log.debug(
                 "timezone",
-                "Guessed an invalid timezone. Use UTC as fallback"
+                "Guessed an invalid timezone. Use UTC as fallback",
             );
             return "UTC";
         }
@@ -474,9 +474,9 @@ class UptimeKumaServer {
     async startMonitor(monitorID) {
         log.info("manage", `Resume Monitor: ${monitorID} by server`);
 
-        await R.exec("UPDATE monitor SET active = 1 WHERE id = ?", [monitorID]);
+        await R.exec("UPDATE monitor SET active = 1 WHERE id = ?", [ monitorID ]);
 
-        let monitor = await R.findOne("monitor", " id = ? ", [monitorID]);
+        let monitor = await R.findOne("monitor", " id = ? ", [ monitorID ]);
 
         if (monitor.id in this.monitorList) {
             this.monitorList[monitor.id].stop();
@@ -497,6 +497,7 @@ class UptimeKumaServer {
 
     /**
      * Check if monitors are running properly
+     * @returns {Promise<void>}
      */
     async checkMonitors() {
         log.debug("monitor_checker", "Checking monitors");
@@ -523,34 +524,34 @@ class UptimeKumaServer {
                         `Monitor Interval: ${monitor.interval} Monitor ` +
                             monitorID +
                             " lastStartBeatTime diff: " +
-                            diff
+                            diff,
                     );
                     log.error(
                         "monitor_checker",
                         "Unexpected error: Monitor " +
                             monitorID +
-                            " is struck for unknown reason"
+                            " is struck for unknown reason",
                     );
                     log.error(
                         "monitor_checker",
                         "Last start beat time: " +
-                            R.isoDateTime(monitor.lastStartBeatTime)
+                            R.isoDateTime(monitor.lastStartBeatTime),
                     );
                     log.error(
                         "monitor_checker",
                         "Last end beat time: " +
-                            R.isoDateTime(monitor.lastEndBeatTime)
+                            R.isoDateTime(monitor.lastEndBeatTime),
                     );
                     log.error(
                         "monitor_checker",
                         "Last ScheduleBeatTime: " +
-                            R.isoDateTime(monitor.lastScheduleBeatTime)
+                            R.isoDateTime(monitor.lastScheduleBeatTime),
                     );
 
                     // Restart
                     log.error(
                         "monitor_checker",
-                        `Restarting monitor ${monitorID} automatically now`
+                        `Restarting monitor ${monitorID} automatically now`,
                     );
                     this.restartMonitor(monitorID);
                 } else {

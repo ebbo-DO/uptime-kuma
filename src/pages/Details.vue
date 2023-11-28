@@ -2,8 +2,8 @@
     <transition name="slide-fade" appear>
         <div v-if="monitor">
             <router-link v-if="group !== ''" :to="monitorURL(monitor.parent)">
-                {{ group }}</router-link
-            >
+                {{ group }}
+            </router-link>
             <h1>{{ monitor.name }}</h1>
             <p v-if="monitor.description">{{ monitor.description }}</p>
             <div class="tags">
@@ -18,27 +18,22 @@
                 <a
                     v-if="
                         monitor.type === 'http' ||
-                        monitor.type === 'keyword' ||
-                        monitor.type === 'json-query' ||
-                        monitor.type === 'mp-health' ||
-                        monitor.type === 'real-browser' ||
-                        monitor.type === 'real-browser-keyword'
+                            monitor.type === 'keyword' ||
+                            monitor.type === 'json-query' ||
+                            monitor.type === 'mp-health' ||
+                            monitor.type === 'real-browser' ||
+                            monitor.type === 'real-browser-keyword'
                     "
                     :href="monitor.url"
                     target="_blank"
                     rel="noopener noreferrer"
-                    >{{ filterPassword(monitor.url) }}</a
-                >
-                <span v-if="monitor.type === 'port'"
-                    >TCP Port {{ monitor.hostname }}:{{ monitor.port }}</span
-                >
-                <span v-if="monitor.type === 'ping'"
-                    >Ping: {{ monitor.hostname }}</span
-                >
+                >{{ filterPassword(monitor.url) }}</a>
+                <span v-if="monitor.type === 'port'">TCP Port {{ monitor.hostname }}:{{ monitor.port }}</span>
+                <span v-if="monitor.type === 'ping'">Ping: {{ monitor.hostname }}</span>
                 <span
                     v-if="
                         monitor.type === 'keyword' ||
-                        monitor.type === 'real-browser-keyword'
+                            monitor.type === 'real-browser-keyword'
                     "
                 >
                     <br />
@@ -49,8 +44,7 @@
                         alt="Inverted keyword"
                         class="keyword-inverted"
                     >
-                        ↧</span
-                    >
+                        ↧</span>
                 </span>
                 <span v-if="monitor.type === 'json-query'">
                     <br />
@@ -60,22 +54,16 @@
                     <span>{{ $t("Expected Value") }}:</span>
                     <span class="keyword">{{ monitor.expectedValue }}</span>
                 </span>
-                <span v-if="monitor.type === 'dns'"
-                    >[{{ monitor.dns_resolve_type }}] {{ monitor.hostname }}
+                <span v-if="monitor.type === 'dns'">[{{ monitor.dns_resolve_type }}] {{ monitor.hostname }}
                     <br />
                     <span>{{ $t("Last Result") }}:</span>
                     <span class="keyword">{{ monitor.dns_last_result }}</span>
                 </span>
-                <span v-if="monitor.type === 'docker'"
-                    >Docker container: {{ monitor.docker_container }}</span
-                >
-                <span v-if="monitor.type === 'gamedig'"
-                    >Gamedig - {{ monitor.game }}: {{ monitor.hostname }}:{{
-                        monitor.port
-                    }}</span
-                >
-                <span v-if="monitor.type === 'grpc-keyword'"
-                    >gRPC - {{ filterPassword(monitor.grpcUrl) }}
+                <span v-if="monitor.type === 'docker'">Docker container: {{ monitor.docker_container }}</span>
+                <span v-if="monitor.type === 'gamedig'">Gamedig - {{ monitor.game }}: {{ monitor.hostname }}:{{
+                    monitor.port
+                }}</span>
+                <span v-if="monitor.type === 'grpc-keyword'">gRPC - {{ filterPassword(monitor.grpcUrl) }}
                     <br />
                     <span>{{ $t("Keyword") }}:</span>
                     <span class="keyword">{{ monitor.keyword }}</span>
@@ -83,41 +71,30 @@
                 <span v-if="monitor.type === 'mongodb'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
-                <span v-if="monitor.type === 'mqtt'"
-                    >MQTT: {{ monitor.hostname }}:{{ monitor.port }}/{{
-                        monitor.mqttTopic
-                    }}</span
-                >
+                <span v-if="monitor.type === 'mqtt'">MQTT: {{ monitor.hostname }}:{{ monitor.port }}/{{
+                    monitor.mqttTopic
+                }}</span>
                 <span v-if="monitor.type === 'mysql'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
                 <span v-if="monitor.type === 'postgres'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
-                <span v-if="monitor.type === 'push'"
-                    >Push:
+                <span v-if="monitor.type === 'push'">Push:
                     <a
                         :href="pushURL"
                         target="_blank"
                         rel="noopener noreferrer"
-                        >{{ pushURL }}</a
-                    ></span
-                >
-                <span v-if="monitor.type === 'radius'"
-                    >Radius: {{ filterPassword(monitor.hostname) }}</span
-                >
+                    >{{ pushURL }}</a></span>
+                <span v-if="monitor.type === 'radius'">Radius: {{ filterPassword(monitor.hostname) }}</span>
                 <span v-if="monitor.type === 'redis'">{{
                     filterPassword(monitor.databaseConnectionString)
                 }}</span>
-                <span v-if="monitor.type === 'sqlserver'"
-                    >SQL Server:
-                    {{ filterPassword(monitor.databaseConnectionString) }}</span
-                >
-                <span v-if="monitor.type === 'steam'"
-                    >Steam Game Server: {{ monitor.hostname }}:{{
-                        monitor.port
-                    }}</span
-                >
+                <span v-if="monitor.type === 'sqlserver'">SQL Server:
+                    {{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'steam'">Steam Game Server: {{ monitor.hostname }}:{{
+                    monitor.port
+                }}</span>
             </p>
 
             <div class="functions">
@@ -175,9 +152,8 @@
                         <span
                             class="badge rounded-pill"
                             :class="'bg-' + status.color"
-                            style="font-size: 30px"
-                            >{{ status.text }}</span
-                        >
+                            style="font-size: 30px;"
+                        >{{ status.text }}</span>
                     </div>
                 </div>
             </div>
@@ -190,8 +166,7 @@
                         pushMonitor.showPushExamples =
                             !pushMonitor.showPushExamples
                     "
-                    >{{ $t("pushViewCode") }}</a
-                >
+                >{{ $t("pushViewCode") }}</a>
 
                 <transition name="slide-fade" appear>
                     <div v-if="pushMonitor.showPushExamples" class="mt-3">
@@ -322,11 +297,10 @@
                                 @click.prevent="
                                     toggleCertInfoBox = !toggleCertInfoBox
                                 "
-                                >{{ tlsInfo.certInfo.daysRemaining }}
+                            >{{ tlsInfo.certInfo.daysRemaining }}
                                 {{
                                     $tc("day", tlsInfo.certInfo.daysRemaining)
-                                }}</a
-                            >
+                                }}</a>
                         </span>
                     </div>
                 </div>
@@ -365,13 +339,13 @@
             <div
                 v-if="
                     monitor.type === 'real-browser' ||
-                    monitor.type === 'real-browser-keyword'
+                        monitor.type === 'real-browser-keyword'
                 "
                 class="shadow-box"
             >
                 <div class="row">
                     <div class="col-md-6">
-                        <img :src="screenshotURL" alt style="width: 100%" />
+                        <img :src="screenshotURL" alt style="width: 100%;" />
                     </div>
                 </div>
             </div>
@@ -419,7 +393,7 @@
                         <tr
                             v-for="(beat, index) in displayedRecords"
                             :key="index"
-                            style="padding: 10px"
+                            style="padding: 10px;"
                         >
                             <td><Status :status="beat.status" /></td>
                             <td :class="{ 'border-0': !beat.msg }">
@@ -500,7 +474,7 @@ import CountUp from "../components/CountUp.vue";
 import Uptime from "../components/Uptime.vue";
 import Pagination from "v-pagination-3";
 const PingChart = defineAsyncComponent(() =>
-    import("../components/PingChart.vue")
+    import("../components/PingChart.vue"),
 );
 import Tag from "../components/Tag.vue";
 import CertificateInfo from "../components/CertificateInfo.vue";
@@ -623,7 +597,7 @@ export default {
             }
             return this.monitor.pathName.substr(
                 0,
-                this.monitor.pathName.lastIndexOf("/")
+                this.monitor.pathName.lastIndexOf("/"),
             );
         },
 
@@ -669,7 +643,7 @@ export default {
 
         this.$root.emitter.on(
             "newImportantHeartbeat",
-            this.onNewImportantHeartbeat
+            this.onNewImportantHeartbeat,
         );
 
         if (this.monitor && this.monitor.type === "push") {
@@ -684,7 +658,7 @@ export default {
     beforeUnmount() {
         this.$root.emitter.off(
             "newImportantHeartbeat",
-            this.onNewImportantHeartbeat
+            this.onNewImportantHeartbeat,
         );
     },
 
@@ -841,7 +815,7 @@ export default {
                 // Handle SQL Server
                 return urlString.replaceAll(
                     /Password=(.+);/gi,
-                    "Password=******;"
+                    "Password=******;",
                 );
             }
         },
@@ -862,7 +836,7 @@ export default {
                                 this.importantHeartBeatListLength = res.count;
                                 this.getImportantHeartbeatListPaged();
                             }
-                        }
+                        },
                     );
             }
         },
@@ -885,7 +859,7 @@ export default {
                             if (res.ok) {
                                 this.displayedRecords = res.data;
                             }
-                        }
+                        },
                     );
             }
         },
@@ -928,10 +902,10 @@ export default {
                             .replace("60", this.monitor.interval)
                             .replace(
                                 "https://example.com/api/push/key?status=up&msg=OK&ping=",
-                                this.pushURL
+                                this.pushURL,
                             );
                         this.pushMonitor.code = code;
-                    }
+                    },
                 );
         },
     },

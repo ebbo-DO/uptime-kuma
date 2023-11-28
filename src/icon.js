@@ -102,7 +102,7 @@ library.add(
     faCertificate,
     faFileContract,
     faPrint,
-    faChevronLeft
+    faChevronLeft,
 );
 
 export { FontAwesomeIcon };
