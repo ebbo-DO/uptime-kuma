@@ -1,0 +1,932 @@
+<template>
+    <transition name="slide-fade" appear>
+        <div v-if="monitor" style="margin-top: 10px;">
+            <h2>{{ monitor.name }}</h2>
+            <p v-if="monitor.description">{{ monitor.description }}</p>
+            <p v-if="group !== '' && !nested">{{ group }}</p>
+            <div class="tags">
+                <Tag
+                    v-for="tag in monitor.tags"
+                    :key="tag.id"
+                    :item="tag"
+                    :size="'sm'"
+                />
+            </div>
+            <p v-if="monitor.type !== 'group'" class="url">
+                {{ $t("Hostname") }}:
+                <a
+                    v-if="
+                        monitor.type === 'http' ||
+                            monitor.type === 'keyword' ||
+                            monitor.type === 'json-query' ||
+                            monitor.type === 'mp-health' ||
+                            monitor.type === 'real-browser' ||
+                            monitor.type === 'real-browser-keyword'
+                    "
+                    :href="monitor.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >{{ filterPassword(monitor.url) }}
+                </a>
+                <span v-if="monitor.type === 'port'">TCP Port {{ monitor.hostname }}:{{ monitor.port }}</span>
+                <span v-if="monitor.type === 'ping'">Ping: {{ monitor.hostname }}</span>
+                <span
+                    v-if="
+                        monitor.type === 'keyword' ||
+                            monitor.type === 'real-browser-keyword'
+                    "
+                >
+                    <br />
+                    <span>{{ $t("Keyword") }}: </span>
+                    <span class="keyword">{{ monitor.keyword }}</span>
+                    <span
+                        v-if="monitor.invertKeyword"
+                        alt="Inverted keyword"
+                        class="keyword-inverted"
+                    >
+                        ↧</span>
+                </span>
+                <span v-if="monitor.type === 'json-query'">
+                    <br />
+                    <span>{{ $t("Json Query") }}:</span>
+                    <span class="keyword">{{ monitor.jsonPath }}</span>
+                    <br />
+                    <span>{{ $t("Expected Value") }}:</span>
+                    <span class="keyword">{{ monitor.expectedValue }}</span>
+                </span>
+                <span v-if="monitor.type === 'dns'">[{{ monitor.dns_resolve_type }}] {{ monitor.hostname }}
+                    <br />
+                    <span>{{ $t("Last Result") }}:</span>
+                    <span class="keyword">{{ monitor.dns_last_result }}</span>
+                </span>
+                <span v-if="monitor.type === 'docker'">Docker container: {{ monitor.docker_container }}</span>
+                <span v-if="monitor.type === 'gamedig'">Gamedig - {{ monitor.game }}: {{ monitor.hostname }}:{{
+                    monitor.port
+                }}</span>
+                <span v-if="monitor.type === 'grpc-keyword'">gRPC - {{ filterPassword(monitor.grpcUrl) }}
+                    <br />
+                    <span>{{ $t("Keyword") }}:</span>
+                    <span class="keyword">{{ monitor.keyword }}</span>
+                </span>
+                <span v-if="monitor.type === 'mongodb'">{{
+                    filterPassword(monitor.databaseConnectionString)
+                }}</span>
+                <span v-if="monitor.type === 'mqtt'">MQTT: {{ monitor.hostname }}:{{ monitor.port }}/{{
+                    monitor.mqttTopic
+                }}</span>
+                <span v-if="monitor.type === 'mysql'">{{
+                    filterPassword(monitor.databaseConnectionString)
+                }}</span>
+                <span v-if="monitor.type === 'postgres'">{{
+                    filterPassword(monitor.databaseConnectionString)
+                }}</span>
+                <span v-if="monitor.type === 'push'">Push:
+                    <a
+                        :href="pushURL"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >{{ pushURL }}</a></span>
+                <span v-if="monitor.type === 'radius'">Radius: {{ filterPassword(monitor.hostname) }}</span>
+                <span v-if="monitor.type === 'redis'">{{
+                    filterPassword(monitor.databaseConnectionString)
+                }}</span>
+                <span v-if="monitor.type === 'sqlserver'">SQL Server:
+                    {{ filterPassword(monitor.databaseConnectionString) }}</span>
+                <span v-if="monitor.type === 'steam'">Steam Game Server: {{ monitor.hostname }}:{{
+                    monitor.port
+                }}</span>
+            </p>
+            <!-- Stats -->
+            <div class="shadow-box big-padding text-center stats">
+                <div class="row">
+                    <div
+                        v-if="monitor.type !== 'group'"
+                        class="col-12 col-sm col row d-flex align-items-center d-sm-block"
+                    >
+                        <h4 class="col-4 col-sm-12">
+                            {{ pingTitle(true) }}
+                        </h4>
+                        <span class="col-4 col-sm-12 num">
+                            <CountUp :value="avgPing" />
+                        </span>
+                    </div>
+                    <!-- Uptime -->
+                    <div
+                        class="col-12 col-sm col row d-flex align-items-center d-sm-block"
+                    >
+                        <h4 class="col-4 col-sm-12">{{ $t("Uptime") }}</h4>
+                        <span class="col-4 col-sm-12 num">
+                            <CountUp :value="uptime" />
+                        </span>
+                    </div>
+                    <div
+                        v-if="tlsInfo"
+                        class="col-12 col-sm col row d-flex align-items-center d-sm-block"
+                    >
+                        <h4 class="col-4 col-sm-12">
+                            {{ $t("Cert Exp.") }}
+                        </h4>
+                        <p class="col-4 col-sm-12 mb-0 mb-sm-2">
+                            (<Datetime
+                                :value="tlsInfo.certInfo.validTo"
+                                date-only
+                            />)
+                        </p>
+                        <span class="col-4 col-sm-12 num">
+                            <a
+                                href="#"
+                                @click.prevent="
+                                    toggleCertInfoBox = !toggleCertInfoBox
+                                "
+                            >{{ tlsInfo.certInfo.daysRemaining }}
+                                {{
+                                    $tc("day", tlsInfo.certInfo.daysRemaining)
+                                }}</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- Ping Chart -->
+            <div
+                v-if="monitor.type !== 'group'"
+                class="shadow-box big-padding text-center ping-chart-wrapper"
+            >
+                <div class="row">
+                    <div class="col">
+                        <div
+                            class="chart-wrapper"
+                            :class="{ loading: loading }"
+                        >
+                            <Line :data="chartData" :options="chartOptions" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="monitor.type === 'group'">
+                <Subreport
+                    v-for="(item, index) in monitors"
+                    :key="index"
+                    :monitor="item"
+                    :chartPeriodOptions="chartPeriodOptions"
+                    :chartPeriodHrs="chartPeriodHrs"
+                    :lastMonthStart="lastMonthStart"
+                    :lastMonthEnd="lastMonthEnd"
+                    :currentQuarterStart="currentQuarterStart"
+                    :currentQuarterEnd="currentQuarterEnd"
+                    :previousQuarterStart="previousQuarterStart"
+                    :previousQuarterEnd="previousQuarterEnd"
+                    :customDateRange="customDateRange"
+                    :nested="true"
+                />
+            </div>
+        </div>
+    </transition>
+</template>
+
+<script>
+import Datetime from "../components/Datetime.vue";
+import CountUp from "../components/CountUp.vue";
+import Tag from "../components/Tag.vue";
+import { getMonitorRelativeURL } from "../util.ts";
+import { URL } from "whatwg-url";
+import { getResBaseURL } from "../util-frontend";
+import {
+    BarController,
+    BarElement,
+    Chart,
+    Filler,
+    LinearScale,
+    LineController,
+    LineElement,
+    PointElement,
+    TimeScale,
+    Tooltip,
+} from "chart.js";
+import "chartjs-adapter-dayjs-4";
+import dayjs from "dayjs";
+import { Line } from "vue-chartjs";
+import { DOWN, PENDING, MAINTENANCE } from "../util.ts";
+Chart.register(
+    LineController,
+    BarController,
+    LineElement,
+    PointElement,
+    TimeScale,
+    BarElement,
+    LinearScale,
+    Tooltip,
+    Filler,
+);
+
+export default {
+    components: {
+        CountUp,
+        Datetime,
+        Tag,
+        Line,
+    },
+    props: {
+        /** Monitor this represents */
+        monitor: {
+            type: Object,
+            default: null,
+        },
+        chartPeriodHrs: {
+            type: null,
+            default: "3",
+        },
+        nested: {
+            type: Boolean,
+            default: false,
+        },
+        chartPeriodOptions: {
+            type: Object,
+            default: null,
+        },
+        customDateRange: {
+            type: Array,
+            default: () => [],
+        },
+        lastMonthStart: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        lastMonthEnd: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        currentQuarterStart: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        currentQuarterEnd: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        previousQuarterStart: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+        previousQuarterEnd: {
+            type: dayjs.Dayjs,
+            default: null,
+        },
+    },
+    data() {
+        return {
+            heartBeatList: [],
+            toggleCertInfoBox: false,
+            showPingChartBox: true,
+            cacheTime: Date.now(),
+            loading: false,
+            heartbeatListChart: null,
+        };
+    },
+    computed: {
+        monitors() {
+            let monitors = [];
+            if (this.monitor.type === "group") {
+                let result = Object.values(this.$root.monitorList);
+                monitors = result.filter((m) => {
+                    return m.parent === this.monitor.id;
+                });
+            }
+            return monitors;
+        },
+        lastHeartBeat() {
+            // Also trigger screenshot refresh here
+            // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+            this.cacheTime = Date.now();
+
+            if (
+                this.monitor.id in this.$root.lastHeartbeatList &&
+                this.$root.lastHeartbeatList[this.monitor.id]
+            ) {
+                return this.$root.lastHeartbeatList[this.monitor.id];
+            }
+
+            return {
+                status: -1,
+            };
+        },
+        ping() {
+            if (this.lastHeartBeat.ping || this.lastHeartBeat.ping === 0) {
+                return this.lastHeartBeat.ping;
+            }
+
+            return this.$t("notAvailableShort");
+        },
+        uptime() {
+            if (
+                !this.heartbeatListChart ||
+                this.heartbeatListChart.length <= 0
+            ) {
+                return this.$t("No Data");
+            }
+            let ut = 0;
+            this.heartbeatListChart.forEach((h) => {
+                // console.log(h);
+                if (h.status !== DOWN) {
+                    ut += 1;
+                }
+            });
+            ut = (ut / this.heartbeatListChart.length) * 100;
+            return ut.toFixed(2).toString() + "%";
+        },
+        avgPing() {
+            if (
+                !this.heartbeatListChart ||
+                this.heartbeatListChart.length <= 0
+            ) {
+                return this.ping;
+            }
+            let avgPing = 0;
+            this.heartbeatListChart.forEach((h) => {
+                avgPing += h.ping;
+            });
+            avgPing = avgPing / this.heartbeatListChart.length;
+            return avgPing.toFixed(3).toString() + " ms";
+        },
+        status() {
+            if (this.$root.statusList[this.monitor.id]) {
+                return this.$root.statusList[this.monitor.id];
+            }
+
+            return {};
+        },
+        tlsInfo() {
+            // Add: this.$root.tlsInfoList[this.monitor.id].certInfo
+            // Fix: TypeError: Cannot read properties of undefined (reading 'validTo')
+            // Reason: TLS Info object format is changed in 1.8.0, if for some reason, it cannot connect to the site after update to 1.8.0, the object is still in the old format.
+            if (
+                this.$root.tlsInfoList[this.monitor.id] &&
+                this.$root.tlsInfoList[this.monitor.id].certInfo
+            ) {
+                return this.$root.tlsInfoList[this.monitor.id];
+            }
+
+            return null;
+        },
+        showCertInfoBox() {
+            return this.tlsInfo != null && this.toggleCertInfoBox;
+        },
+        group() {
+            if (!this.monitor.pathName.includes("/")) {
+                return "";
+            }
+            return this.monitor.pathName.substr(
+                0,
+                this.monitor.pathName.lastIndexOf("/"),
+            );
+        },
+        chartOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                onResize: (chart) => {
+                    chart.canvas.parentNode.style.position = "relative";
+                    if (screen.width < 576) {
+                        chart.canvas.parentNode.style.height = "275px";
+                    } else if (screen.width < 768) {
+                        chart.canvas.parentNode.style.height = "320px";
+                    } else if (screen.width < 992) {
+                        chart.canvas.parentNode.style.height = "300px";
+                    } else {
+                        chart.canvas.parentNode.style.height = "250px";
+                    }
+                },
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 30,
+                        top: 30,
+                        bottom: 10,
+                    },
+                },
+                elements: {
+                    point: {
+                        // Hide points on chart unless mouse-over
+                        radius: 0,
+                        hitRadius: 100,
+                    },
+                },
+                scales: {
+                    x: {
+                        type: "time",
+                        time: {
+                            minUnit: "minute",
+                            round: "second",
+                            tooltipFormat: "YYYY-MM-DD HH:mm:ss",
+                            displayFormats: {
+                                minute: "HH:mm",
+                                hour: "MM-DD HH:mm",
+                            },
+                        },
+                        ticks: {
+                            sampleSize: 3,
+                            maxRotation: 0,
+                            autoSkipPadding: 30,
+                            padding: 3,
+                        },
+                        grid: {
+                            color:
+                                this.$root.theme === "light"
+                                    ? "rgba(0,0,0,0.1)"
+                                    : "rgba(255,255,255,0.1)",
+                            offset: false,
+                        },
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: this.$t("respTime"),
+                        },
+                        offset: false,
+                        grid: {
+                            color:
+                                this.$root.theme === "light"
+                                    ? "rgba(0,0,0,0.1)"
+                                    : "rgba(255,255,255,0.1)",
+                        },
+                    },
+                    y1: {
+                        display: false,
+                        position: "right",
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        min: 0,
+                        max: 1,
+                        offset: false,
+                    },
+                },
+                bounds: "ticks",
+                plugins: {
+                    tooltip: {
+                        mode: "nearest",
+                        intersect: false,
+                        padding: 10,
+                        backgroundColor:
+                            this.$root.theme === "light"
+                                ? "rgba(212,232,222,1.0)"
+                                : "rgba(32,42,38,1.0)",
+                        bodyColor:
+                            this.$root.theme === "light"
+                                ? "rgba(12,12,18,1.0)"
+                                : "rgba(220,220,220,1.0)",
+                        titleColor:
+                            this.$root.theme === "light"
+                                ? "rgba(12,12,18,1.0)"
+                                : "rgba(220,220,220,1.0)",
+                        filter: function (tooltipItem) {
+                            return tooltipItem.datasetIndex === 0; // Hide tooltip on Bar Chart
+                        },
+                        callbacks: {
+                            label: (context) => {
+                                return ` ${new Intl.NumberFormat().format(
+                                    context.parsed.y,
+                                )} ms`;
+                            },
+                        },
+                    },
+                    legend: {
+                        display: false,
+                    },
+                },
+            };
+        },
+        chartData() {
+            let pingData = []; // Ping Data for Line Chart, y-axis contains ping time
+            let downData = []; // Down Data for Bar Chart, y-axis is 1 if target is down (red color), under maintenance (blue color) or pending (orange color), 0 if target is up
+            let colorData = []; // Color Data for Bar Chart
+
+            let heartbeatListChart =
+                this.heartbeatListChart ||
+                (this.monitor.id in this.$root.heartbeatList &&
+                    this.$root.heartbeatList[this.monitor.id]) ||
+                [];
+
+            heartbeatListChart.map((beat) => {
+                const x = this.$root.datetime(beat.time);
+                pingData.push({
+                    x,
+                    y: beat.ping,
+                });
+                downData.push({
+                    x,
+                    y:
+                        beat.status === DOWN ||
+                        beat.status === MAINTENANCE ||
+                        beat.status === PENDING
+                            ? 1
+                            : 0,
+                });
+                colorData.push(
+                    beat.status === MAINTENANCE
+                        ? "rgba(23,71,245,0.41)"
+                        : beat.status === PENDING
+                            ? "rgba(245,182,23,0.41)"
+                            : "#DC354568",
+                );
+            });
+            return {
+                datasets: [
+                    {
+                        // Line Chart
+                        data: pingData,
+                        fill: "origin",
+                        tension: 0.2,
+                        borderColor: "#5CDD8B",
+                        backgroundColor: "#5CDD8B38",
+                        yAxisID: "y",
+                        label: "ping",
+                    },
+                    {
+                        // Bar Chart
+                        type: "bar",
+                        data: downData,
+                        borderColor: "#00000000",
+                        backgroundColor: colorData,
+                        yAxisID: "y1",
+                        barThickness: "flex",
+                        barPercentage: 1,
+                        categoryPercentage: 1,
+                        inflateAmount: 0.05,
+                        label: "status",
+                    },
+                ],
+            };
+        },
+    },
+    watch: {
+        customDateRange: function (newDates) {
+            if (this.chartPeriodHrs === "c" && newDates.length > 0) {
+                this.loading = true;
+                this.$root.getMonitorBeatsRange(
+                    this.monitor.id,
+                    newDates[0].toISOString(),
+                    newDates[1].toISOString(),
+                    (res) => {
+                        if (!res.ok) {
+                            this.$root.toastError(res.msg);
+                        } else {
+                            this.heartbeatListChart = res.data;
+                        }
+                        this.loading = false;
+                    },
+                );
+            }
+        },
+        // Update chart data when the selected chart period changes
+        chartPeriodHrs: function (newPeriod) {
+            if (newPeriod === "0") {
+                this.heartbeatListChart = null;
+                this.$root
+                    .storage()
+                    .removeItem(`report-period-${this.monitor.id}`);
+                this.$root.getMonitorBeats(
+                    this.$route.params.id,
+                    newPeriod,
+                    (res) => {
+                        if (!res.ok) {
+                            this.$root.toastError(res.msg);
+                        } else {
+                            this.heartbeatListChart = res.data;
+                            this.$root.storage()[
+                                `report-period-${this.monitor.id}`
+                            ] = newPeriod;
+                        }
+                        this.loading = false;
+                        // console.log(this.heartbeatListChart);
+                    },
+                );
+            } else {
+                this.loading = true;
+                if (newPeriod === "lm") {
+                    this.$root.getMonitorBeatsRange(
+                        this.monitor.id,
+                        this.lastMonthStart.toISOString(),
+                        this.lastMonthEnd.toISOString(),
+                        (res) => {
+                            if (!res.ok) {
+                                this.$root.toastError(res.msg);
+                            } else {
+                                this.heartbeatListChart = res.data;
+                                this.$root.storage()[
+                                    `report-period-${this.monitor.id}`
+                                ] = newPeriod;
+                            }
+                            this.loading = false;
+                        },
+                    );
+                } else if (newPeriod === "cq") {
+                    this.$root.getMonitorBeatsRange(
+                        this.monitor.id,
+                        this.currentQuarterStart.toISOString(),
+                        this.currentQuarterEnd.toISOString(),
+                        (res) => {
+                            // console.log(res.data);
+                            if (!res.ok) {
+                                this.$root.toastError(res.msg);
+                            } else {
+                                this.heartbeatListChart = res.data;
+                                this.$root.storage()[
+                                    `report-period-${this.monitor.id}`
+                                ] = newPeriod;
+                            }
+                            this.loading = false;
+                        },
+                    );
+                } else if (newPeriod === "lq") {
+                    this.$root.getMonitorBeatsRange(
+                        this.monitor.id,
+                        this.previousQuarterStart.toISOString(),
+                        this.previousQuarterEnd.toISOString(),
+                        (res) => {
+                            if (!res.ok) {
+                                this.$root.toastError(res.msg);
+                            } else {
+                                this.heartbeatListChart = res.data;
+                                this.$root.storage()[
+                                    `report-period-${this.monitor.id}`
+                                ] = newPeriod;
+                            }
+                            this.loading = false;
+                        },
+                    );
+                } else if (newPeriod === "c") {
+                    // Do Nothing here, we need to wait on the custom date range.
+                    this.loading = false;
+                } else {
+                    this.$root.getMonitorBeats(
+                        this.monitor.id,
+                        parseInt(newPeriod),
+                        (res) => {
+                            if (!res.ok) {
+                                this.$root.toastError(res.msg);
+                            } else {
+                                this.heartbeatListChart = res.data;
+                                this.$root.storage()[
+                                    `report-period-${this.monitor.id}`
+                                ] = newPeriod;
+                            }
+                            this.loading = false;
+                        },
+                    );
+                }
+            }
+            this.avgPing;
+            this.uptime;
+        },
+    },
+    methods: {
+        getResBaseURL,
+        /**
+         * Request a test notification be sent for this monitor
+         * @returns {void}
+         */
+        testNotification() {
+            this.$root.getSocket().emit("testNotification", this.monitor.id);
+            this.$root.toastSuccess("Test notification is requested.");
+        },
+        /**
+         * Return the correct title for the ping stat
+         * @param {boolean} average Is the statistic an average?
+         * @returns {string} Title formatted dependant on monitor type
+         */
+        pingTitle(average = false) {
+            let translationPrefix = "";
+            if (average) {
+                translationPrefix = "Avg. ";
+            }
+
+            if (
+                this.monitor.type === "http" ||
+                this.monitor.type === "keyword" ||
+                this.monitor.type === "json-query"
+            ) {
+                return this.$t(translationPrefix + "Response");
+            }
+
+            return this.$t(translationPrefix + "Ping");
+        },
+        /**
+         * Get URL of monitor
+         * @param {number} id ID of monitor
+         * @returns {string} Relative URL of monitor
+         */
+        monitorURL(id) {
+            return getMonitorRelativeURL(id);
+        },
+        /**
+         * Filter and hide password in URL for display
+         * @param {string} urlString URL to censor
+         * @returns {string} Censored URL
+         */
+        filterPassword(urlString) {
+            try {
+                let parsedUrl = new URL(urlString);
+                if (parsedUrl.password !== "") {
+                    parsedUrl.password = "******";
+                }
+                return parsedUrl.toString();
+            } catch (e) {
+                // Handle SQL Server
+                return urlString.replaceAll(
+                    /Password=(.+);/gi,
+                    "Password=******;",
+                );
+            }
+        },
+    },
+};
+</script>
+
+<style lang="scss">
+@media print {
+    .print-me {
+        background-color: white;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+    }
+
+    header.d-flex {
+        display: none !important;
+        height: 0;
+    }
+
+    main {
+        position: relative;
+        height: 0;
+    }
+
+    main div.shadow-box.mb-3 {
+        display: none;
+    }
+
+    div#app {
+        // display: none;
+        position: relative;
+        height: 0;
+    }
+}
+</style>
+<style lang="scss" scoped>
+@import "../assets/vars.scss";
+
+.chart-wrapper {
+    margin-bottom: 0.5em;
+
+    &.loading {
+        filter: blur(10px);
+    }
+}
+
+@media (max-width: 767px) {
+    .badge {
+        margin-top: 14px;
+    }
+}
+
+@media (max-width: 550px) {
+    .functions {
+        text-align: center;
+    }
+
+    .ping-chart-wrapper {
+        padding: 10px !important;
+    }
+
+    .dropdown-clear-data {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 400px) {
+    .btn {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 10px;
+        font-size: 0.9em;
+    }
+
+    a.btn {
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+
+    .dropdown-clear-data {
+        button {
+            display: block;
+            padding-top: 4px;
+        }
+    }
+}
+
+.url {
+    color: $primary;
+    margin-bottom: 20px;
+    font-weight: bold;
+
+    a {
+        color: $primary;
+    }
+}
+
+.shadow-box {
+    padding: 20px;
+    margin-top: 25px;
+}
+
+.word {
+    color: #aaa;
+    font-size: 14px;
+}
+
+table {
+    font-size: 14px;
+
+    tr {
+        transition: all ease-in-out 0.2ms;
+    }
+}
+
+.stats p {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.stats {
+    padding: 10px;
+
+    .col {
+        margin: 20px 0;
+    }
+}
+
+@media (max-width: 550px) {
+    .stats {
+        .col {
+            margin: 10px 0 !important;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+        }
+    }
+}
+
+.keyword {
+    color: black;
+}
+
+.dropdown-clear-data {
+    float: right;
+
+    ul {
+        width: 100%;
+        min-width: unset;
+        padding-left: 0;
+    }
+}
+
+.dark {
+    .keyword {
+        color: $dark-font-color;
+    }
+
+    .keyword-inverted {
+        color: $dark-font-color;
+    }
+
+    .dropdown-clear-data {
+        ul {
+            background-color: $dark-bg;
+            border-color: $dark-bg2;
+            border-width: 2px;
+
+            li button {
+                color: $dark-font-color;
+            }
+
+            li button:hover {
+                background-color: $dark-bg2;
+            }
+        }
+    }
+}
+
+.tags {
+    margin-bottom: 0.5rem;
+}
+
+.tags > div:first-child {
+    margin-left: 0 !important;
+}
+</style>

@@ -33,7 +33,8 @@ export default {
             let key = this.monitor.id + "_" + this.type;
 
             if (this.$root.uptimeList[key] !== undefined) {
-                let result = Math.round(this.$root.uptimeList[key] * 10000) / 100;
+                let result =
+                    Math.round(this.$root.uptimeList[key] * 10000) / 100;
                 // Only perform sanity check on status page. See louislam/uptime-kuma#2628
                 if (this.$route.path.startsWith("/status") && result > 100) {
                     return "100%";
@@ -66,7 +67,10 @@ export default {
         },
 
         lastHeartBeat() {
-            if (this.monitor.id in this.$root.lastHeartbeatList && this.$root.lastHeartbeatList[this.monitor.id]) {
+            if (
+                this.monitor.id in this.$root.lastHeartbeatList &&
+                this.$root.lastHeartbeatList[this.monitor.id]
+            ) {
                 return this.$root.lastHeartbeatList[this.monitor.id];
             }
 
@@ -84,14 +88,21 @@ export default {
         },
 
         title() {
-            if (this.type === "1y") {
+            if (this.type === "1y" || this.type === "8760") {
                 return `1${this.$t("-year")}`;
-            }
-            if (this.type === "720") {
+            } else if (this.type === "168") {
+                return `7${this.$t("-day")}`;
+            } else if (this.type === "720") {
                 return `30${this.$t("-day")}`;
+            } else if (this.type === "2160") {
+                return `90${this.$t("-day")}`;
+            } else if (this.type === "3") {
+                return `3${this.$t("-hour")}`;
+            } else if (this.type === "6") {
+                return `3${this.$t("-hour")}`;
             }
             return `24${this.$t("-hour")}`;
-        }
+        },
     },
 };
 </script>

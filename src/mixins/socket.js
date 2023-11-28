@@ -673,6 +673,17 @@ export default {
         getMonitorBeats(monitorID, period, callback) {
             socket.emit("getMonitorBeats", monitorID, period, callback);
         },
+        /**
+         * Get monitor beats for a specific monitor in a time range
+         * @param {number} monitorID ID of monitor to fetch
+         * @param {string} startDate Start Date ISO String
+         * @param {string} endDate End Date ISO String
+         * @param {socketCB} callback Callback for socket response
+         * @returns {void}
+         */
+        getMonitorBeatsRange(monitorID, startDate, endDate, callback) {
+            socket.emit("getMonitorBeatsRange", monitorID, startDate, endDate, callback);
+        },
     },
 
     computed: {

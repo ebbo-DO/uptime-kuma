@@ -15,25 +15,45 @@ let allowedList = [];
 let lastAutoDetectChromeExecutable = null;
 
 if (process.platform === "win32") {
-    allowedList.push(process.env.LOCALAPPDATA + "\\Google\\Chrome\\Application\\chrome.exe");
-    allowedList.push(process.env.PROGRAMFILES + "\\Google\\Chrome\\Application\\chrome.exe");
-    allowedList.push(process.env["ProgramFiles(x86)"] + "\\Google\\Chrome\\Application\\chrome.exe");
+    allowedList.push(
+        process.env.LOCALAPPDATA + "\\Google\\Chrome\\Application\\chrome.exe"
+    );
+    allowedList.push(
+        process.env.PROGRAMFILES + "\\Google\\Chrome\\Application\\chrome.exe"
+    );
+    allowedList.push(
+        process.env["ProgramFiles(x86)"] +
+            "\\Google\\Chrome\\Application\\chrome.exe"
+    );
 
     // Allow Chromium too
-    allowedList.push(process.env.LOCALAPPDATA + "\\Chromium\\Application\\chrome.exe");
-    allowedList.push(process.env.PROGRAMFILES + "\\Chromium\\Application\\chrome.exe");
-    allowedList.push(process.env["ProgramFiles(x86)"] + "\\Chromium\\Application\\chrome.exe");
+    allowedList.push(
+        process.env.LOCALAPPDATA + "\\Chromium\\Application\\chrome.exe"
+    );
+    allowedList.push(
+        process.env.PROGRAMFILES + "\\Chromium\\Application\\chrome.exe"
+    );
+    allowedList.push(
+        process.env["ProgramFiles(x86)"] + "\\Chromium\\Application\\chrome.exe"
+    );
 
     // Allow MS Edge
-    allowedList.push(process.env["ProgramFiles(x86)"] + "\\Microsoft\\Edge\\Application\\msedge.exe");
+    allowedList.push(
+        process.env["ProgramFiles(x86)"] +
+            "\\Microsoft\\Edge\\Application\\msedge.exe"
+    );
 
     // For Loop A to Z
     for (let i = 65; i <= 90; i++) {
         let drive = String.fromCharCode(i);
-        allowedList.push(drive + ":\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
-        allowedList.push(drive + ":\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe");
+        allowedList.push(
+            drive + ":\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        );
+        allowedList.push(
+            drive +
+                ":\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+        );
     }
-
 } else if (process.platform === "linux") {
     allowedList = [
         "chromium",
@@ -58,7 +78,10 @@ if (process.platform === "win32") {
  */
 async function isAllowedChromeExecutable(executablePath) {
     console.log(config.args);
-    if (config.args["allow-all-chrome-exec"] || process.env.UPTIME_KUMA_ALLOW_ALL_CHROME_EXEC === "1") {
+    if (
+        config.args["allow-all-chrome-exec"] ||
+        process.env.UPTIME_KUMA_ALLOW_ALL_CHROME_EXEC === "1"
+    ) {
         return true;
     }
 
@@ -92,7 +115,10 @@ async function getBrowser() {
  */
 async function prepareChromeExecutable(executablePath) {
     // Special code for using the playwright_chromium
-    if (typeof executablePath === "string" && executablePath.toLocaleLowerCase() === "#playwright_chromium") {
+    if (
+        typeof executablePath === "string" &&
+        executablePath.toLocaleLowerCase() === "#playwright_chromium"
+    ) {
         // Set to undefined = use playwright_chromium
         executablePath = undefined;
     } else if (!executablePath) {
@@ -100,37 +126,55 @@ async function prepareChromeExecutable(executablePath) {
             executablePath = "/usr/bin/chromium";
 
             // Install chromium in container via apt install
-            if ( !commandExistsSync(executablePath)) {
+            if (!commandExistsSync(executablePath)) {
                 await new Promise((resolve, reject) => {
                     log.info("Chromium", "Installing Chromium...");
-                    let child = childProcess.exec("apt update && apt --yes --no-install-recommends install chromium fonts-indic fonts-noto fonts-noto-cjk");
+                    let child = childProcess.exec(
+                        "apt update && apt --yes --no-install-recommends install chromium fonts-indic fonts-noto fonts-noto-cjk"
+                    );
 
                     // On exit
                     child.on("exit", (code) => {
-                        log.info("Chromium", "apt install chromium exited with code " + code);
+                        log.info(
+                            "Chromium",
+                            "apt install chromium exited with code " + code
+                        );
 
                         if (code === 0) {
                             log.info("Chromium", "Installed Chromium");
-                            let version = childProcess.execSync(executablePath + " --version").toString("utf8");
-                            log.info("Chromium", "Chromium version: " + version);
+                            let version = childProcess
+                                .execSync(executablePath + " --version")
+                                .toString("utf8");
+                            log.info(
+                                "Chromium",
+                                "Chromium version: " + version
+                            );
                             resolve();
                         } else if (code === 100) {
-                            reject(new Error("Installing Chromium, please wait..."));
+                            reject(
+                                new Error("Installing Chromium, please wait...")
+                            );
                         } else {
-                            reject(new Error("apt install chromium failed with code " + code));
+                            reject(
+                                new Error(
+                                    "apt install chromium failed with code " +
+                                        code
+                                )
+                            );
                         }
                     });
                 });
             }
-
         } else {
             executablePath = findChrome(allowedList);
         }
     } else {
         // User specified a path
         // Check if the executablePath is in the list of allowed
-        if (!await isAllowedChromeExecutable(executablePath)) {
-            throw new Error("This Chromium executable path is not allowed by default. If you are sure this is safe, please add an environment variable UPTIME_KUMA_ALLOW_ALL_CHROME_EXEC=1 to allow it.");
+        if (!(await isAllowedChromeExecutable(executablePath))) {
+            throw new Error(
+                "This Chromium executable path is not allowed by default. If you are sure this is safe, please add an environment variable UPTIME_KUMA_ALLOW_ALL_CHROME_EXEC=1 to allow it."
+            );
         }
     }
     return executablePath;
@@ -156,7 +200,9 @@ function findChrome(executables) {
             return executable;
         }
     }
-    throw new Error("Chromium not found, please specify Chromium executable path in the settings page.");
+    throw new Error(
+        "Chromium not found, please specify Chromium executable path in the settings page."
+    );
 }
 
 /**
@@ -197,7 +243,6 @@ async function testChrome(executablePath) {
  *
  */
 class RealBrowserMonitorType extends MonitorType {
-
     name = "real-browser";
 
     /**
@@ -233,8 +278,110 @@ class RealBrowserMonitorType extends MonitorType {
     }
 }
 
+class RealBrowserKeywordMonitorType extends MonitorType {
+    name = "real-browser-keyword";
+
+    /**
+     * @inheritdoc
+     */
+    async check(monitor, heartbeat, server) {
+        // console.log("real-browser-keyword::check");
+        const browser = await getBrowser();
+        const context = await browser.newContext();
+        const page = await context.newPage();
+
+        const res = await page.goto(monitor.url, {
+            waitUntil: "networkidle",
+            timeout: monitor.interval * 1000 * 0.8,
+        });
+
+        //TODO - Make screenshot an option.
+        let filename = jwt.sign(monitor.id, server.jwtSecret) + ".png";
+
+        await page.screenshot({
+            path: path.join(Database.screenshotDir, filename),
+        });
+
+        let content = await page.content();
+
+        //Add iFrame Support
+        // console.log("iFrame...");
+        const pageFrames = await page.frames();
+        // console.log("Total Frames: " + pageFrames.length);
+        for (let index = 0; index < pageFrames.length; index++) {
+            const element = pageFrames[index];
+            // const frameContent = await element.content();
+            content += await element.content();
+            // console.log(frameContent);
+        }
+        // pageFrames.forEach(element => {
+        //     const frameContent = await element.content();
+        // });
+        // const iframeElement = await page.locator("iframe").elementHandle();
+        // console.log(iframeElement);
+        // if (iframeElement) {
+        //     const frame = await iframeElement.contentFrame();
+        //     console.log(frame);
+        // }
+        // console.log("END iFrame");
+
+        // console.log(monitor.keyword);
+        // console.log(content);
+
+        // const loc = page.getByText("test", { exact: true });
+        // // console.log(page.getByText("test", { exact: true }));
+        // await loc.evaluateAll((ele) => {
+        //     console.log(ele);
+        // });
+        // divs.length > min, 10);
+
+        // content(): Promise<string>;
+        // getByText(text: string|RegExp, options?: {
+        //     /**
+        //      * Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
+        //      * regular expression. Note that exact match still trims whitespace.
+        //      */
+        //     exact?: boolean;
+        //   }): Locator;
+
+        await context.close();
+
+        if (res.status() >= 200 && res.status() < 400) {
+            let status = UP;
+            let msg = res.status();
+            let keywordFound = content.includes(monitor.keyword);
+            if (keywordFound === !Boolean(monitor.invertKeyword)) {
+                msg += ", keyword " + (keywordFound ? "is" : "not") + " found";
+                status = UP;
+            } else {
+                content = content.replace(/<[^>]*>?|[\n\r]|\s+/gm, " ").trim();
+                if (content.length > 50) {
+                    content = content.substring(0, 47) + "...";
+                }
+                throw new Error(
+                    msg +
+                        ", but keyword is " +
+                        (keywordFound ? "present" : "not") +
+                        " in [" +
+                        content +
+                        "]"
+                );
+            }
+
+            heartbeat.status = status;
+            heartbeat.msg = msg;
+
+            const timing = res.request().timing();
+            heartbeat.ping = timing.responseEnd;
+        } else {
+            throw new Error(res.status() + "");
+        }
+    }
+}
+
 module.exports = {
     RealBrowserMonitorType,
+    RealBrowserKeywordMonitorType,
     testChrome,
     resetChrome,
 };
