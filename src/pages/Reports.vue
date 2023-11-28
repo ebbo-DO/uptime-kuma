@@ -14,7 +14,7 @@
                             >
                                 {{ chartPeriodOptions[chartPeriodHrs] }}&nbsp;
                             </button>
-                            <ul class="dropdown-menu" style="padding-left: 0">
+                            <ul class="dropdown-menu" style="padding-left: 0;">
                                 <li
                                     v-for="(item, key) in chartPeriodOptions"
                                     :key="key"
