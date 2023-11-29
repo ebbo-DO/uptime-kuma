@@ -20,7 +20,7 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
-    - task: Npm@1
+    - task: Bash@3
       inputs:
-        command: 'custom'
-        customCommand: '"npm run build-docker-full"'
+        targetType: 'inline'
+        script: 'npm run build-docker-full'
