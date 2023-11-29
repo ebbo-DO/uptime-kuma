@@ -23,4 +23,4 @@ stages:
     - task: Npm@1
       inputs:
         command: 'custom'
-        customCommand: 'build-docker-full'
+        customCommand: 'npm run build-docker-full'
